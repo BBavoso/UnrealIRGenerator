@@ -28,14 +28,14 @@ public:
 	// Sets default values for this actor's properties
 	AIR_Generator();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Impulse Response Generation")
 	USphereComponent* Sphere;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Impulse Response Generation")
 	USceneComponent* Root;
 
 public:

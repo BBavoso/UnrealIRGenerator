@@ -8,6 +8,9 @@
 #include "DSP/Noise.h"
 #include "Sampling/SphericalFibonacci.h"
 #include "Sound/SampleBufferIO.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 constexpr float ListenerSphereRadius = 15.0f;
 constexpr float MaxRaycastDistance = 10000.0f;

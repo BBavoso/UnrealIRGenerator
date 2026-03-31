@@ -1,4 +1,5 @@
 #include "AtmosphericFilterCutoffSolver.h"
+#include "Math/UnrealMath.h"
 
 const double kReferenceAirTemperature = 293.15;
 
@@ -17,10 +18,10 @@ static double HumidityConcentration(
 	const double triple_point_temperature_water = 273.16;
 
 	// Exponent to compute molar concentration
-	const double csat = -6.8346 * pow(triple_point_temperature_water / temperature_kelvin, 1.261) + 4.6151;
+	const double csat = -6.8346 * FMath::Pow(triple_point_temperature_water / temperature_kelvin, 1.261) + 4.6151;
 
 	// Saturation vapor pressure
-	const double psat = pow(10, csat);
+	const double psat = FMath::Pow(10, csat);
 
 	// Humidity to molar concentration of water vapor
 	return humidity_percent * psat / pressure_normalized;
@@ -32,10 +33,10 @@ double NitrogenRelaxationFrequency(
 	double pressure_normalized)
 {
 	const double nitrogen_relax_factor
-		= 9 + 280 * humidity_concentration * exp(-4.170 * (pow(temp_normalized, -1.0 / 3) - 1.0));
+		= 9 + 280 * humidity_concentration * FMath::Exp(-4.170 * (FMath::Pow(temp_normalized, -1.0 / 3) - 1.0));
 
 	// An approximate expected value is 200 Hz.
-	return pressure_normalized * (1.0 / sqrt(temp_normalized)) * nitrogen_relax_factor;
+	return pressure_normalized * (1.0 / FMath::Sqrt(temp_normalized)) * nitrogen_relax_factor;
 }
 
 double OxygenRelaxationFrequency(double humidity_concentration, double pressure_normalized)
@@ -56,8 +57,8 @@ double FindFirstRoot(const double a, const double b, const double c, const doubl
 	// Convert to depressed cubic using change of variable.
 	const double p = (3.0 * a * c - b * b) / (3.0 * a * a);
 	const double q = ((2.0 * b * b * b) - (9.0 * b * a * c) + (27.0 * a * d * a)) / (27.0 * a * a * a);
-	const double theta = (3.0 * q * sqrt(-3.0 / p)) / (2.0 * p);
-	const double depressed_root = 2.0 * sqrt(-p / 3.0) * cos(acos(theta) / 3.0);
+	const double theta = (3.0 * q * FMath::Sqrt(-3.0 / p)) / (2.0 * p);
+	const double depressed_root = 2.0 * FMath::Sqrt(-p / 3.0) * FMath::Cos(FMath::Acos(theta) / 3.0);
 
 	// For debugging here are the other real roots:
 	//const double t2 = -2.0 * sqrt(-p / 3.0) *
@@ -84,12 +85,12 @@ AtmosphericFilterCutoffSolver::AtmosphericFilterCutoffSolver(
 	// Very high frequencies are affected more by oxygen relaxation
 	oxygen_relax_freq = OxygenRelaxationFrequency(humidity_concentration, pressure_normalized);
 	const double temp_norm_inv_cube = 1.0 / (temp_normalized * temp_normalized * temp_normalized);
-	const double nitrogen_relax_coefficient = temp_norm_inv_cube * 0.1068 * exp(-3352.0 / temperature_kelvin);
-	const double oxygen_relax_coefficient = temp_norm_inv_cube * 0.01275 * exp(-2239.10 / temperature_kelvin);
+	const double nitrogen_relax_coefficient = temp_norm_inv_cube * 0.1068 * FMath::Exp(-3352.0 / temperature_kelvin);
+	const double oxygen_relax_coefficient = temp_norm_inv_cube * 0.01275 * FMath::Exp(-2239.10 / temperature_kelvin);
 	const double pressure_coefficient = 1.84e-11 / pressure_normalized;
 	
 	// Factor multiplied to the absorption quantities
-	const double outer_coefficient = 8.686 * sqrt(temp_normalized);
+	const double outer_coefficient = 8.686 * FMath::Sqrt(temp_normalized);
 	
 	// Re-arrange the equation as a cubic polynomial with the
 	// absorption_coefficient as the constant factor -a4
@@ -117,6 +118,6 @@ double AtmosphericFilterCutoffSolver::Solve(const double distance, const double 
 		a3 * nitrogen_sq * oxygen_relax_freq + a4 * (nitrogen_sq + oxygen_sq);
 	const double d = a4 * oxygen_sq * nitrogen_sq;
 	const double root = FindFirstRoot(a, b, c, d);
-	const double frequency_hz = sqrt(root);
+	const double frequency_hz = FMath::Sqrt(root);
 	return frequency_hz;
 }
