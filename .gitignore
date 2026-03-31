@@ -1,0 +1,8 @@
+# Unreal Engine
+/Binaries
+/Intermediate
+/Saved
+/Packages
+
+# macOS
+.DS_Store
