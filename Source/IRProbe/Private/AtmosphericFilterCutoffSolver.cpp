@@ -3,9 +3,9 @@
 
 const double kReferenceAirTemperature = 293.15;
 
-double FarenheitToKelvin(const double farenheit)
+double FahrenheitToKelvin(const double fahrenheit)
 {
-	return (farenheit + 459.60) * 5 / 9.0;
+	return (fahrenheit + 459.60) * 5 / 9.0;
 }
 
 // Convert humidity to molar concentration of water vapor as a
@@ -73,7 +73,7 @@ AtmosphericFilterCutoffSolver::AtmosphericFilterCutoffSolver(
 	const double temperature_fahrenheit,
 	const double pressure_pascals)
 {
-	const double temperature_kelvin = FarenheitToKelvin(temperature_fahrenheit);
+	const double temperature_kelvin = FahrenheitToKelvin(temperature_fahrenheit);
 	const double temp_normalized = temperature_kelvin / kReferenceAirTemperature;
 	const double pressure_normalized = pressure_pascals / kPressureSeaLevelPascals;
 	const double humidity_concentration =

@@ -22,5 +22,18 @@ void SIRBakingWindow::Construct(const FArguments& InArgs)
 			SNew(STextBlock)
 			.Text(FText::FromString("Window is working!"))
 		]
+		+ SVerticalBox::Slot()
+		.Padding(20.0f)
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Bake All Probes"))
+			.OnClicked(this, &SIRBakingWindow::BakeAllProbes)
+		]
 	];
+}
+
+FReply SIRBakingWindow::BakeAllProbes() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Generate button clicked!"));
+	return FReply::Handled();
 }
