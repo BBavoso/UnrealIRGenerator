@@ -1,6 +1,9 @@
 #include "IRBakingWindow.h"
+
+#include "Kismet/GameplayStatics.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
+#include "IRProbe/Public/IR_Generator.h"
 
 void SIRBakingWindow::Construct(const FArguments& InArgs)
 {
@@ -35,5 +38,9 @@ void SIRBakingWindow::Construct(const FArguments& InArgs)
 FReply SIRBakingWindow::BakeAllProbes() const
 {
 	UE_LOG(LogTemp, Warning, TEXT("Generate button clicked!"));
+	UWorld* WorldContext = GEditor->GetEditorWorldContext().World();
+	TArray<AActor*> Probes;
+	UGameplayStatics::GetAllActorsOfClass(WorldContext, AIR_Generator::StaticClass(), Probes);
+	UE_LOG(LogTemp, Warning, TEXT("Found %i probes"), Probes.Num());
 	return FReply::Handled();
 }
