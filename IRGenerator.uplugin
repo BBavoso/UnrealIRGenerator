@@ -25,6 +25,11 @@
 			"Name": "IRProbe",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "SubmixManagement",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }
