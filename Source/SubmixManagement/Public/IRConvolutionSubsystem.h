@@ -4,7 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Sound/SoundSubmix.h"
 #include "IRConvolutionSubsystem.generated.h"
+
+UENUM()
+enum class ECrossfadeState : uint8
+{
+	Idle,
+	Crossfading
+};
 
 /**
  * Manages dynamic IR convolution reverb based on player position in volumes
@@ -17,6 +25,7 @@ class SUBMIXMANAGEMENT_API UIRConvolutionSubsystem : public UWorldSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 	// Called by volume actors when player enters
 	UFUNCTION()
@@ -27,11 +36,50 @@ public:
 	void NotifyVolumeExited(AActor* Volume, AActor* OverlappingActor);
 
 private:
+	void LoadPluginAssets();
 	void UpdateActiveVolume();
+	void StartCrossfade(class AIRConvolutionVolume* TargetVolume);
+	void StartFadeToSilence();
+	void TickCrossfade(float DeltaTime);
+	void ApplyIRToSubmix(USoundSubmix* Submix, class UAudioImpulseResponse* ImpulseResponse);
+	void SetSubmixVolume(USoundSubmix* Submix, float Volume);
+
+	// Plugin submixes (loaded automatically from Content/)
+	UPROPERTY()
+	TObjectPtr<USoundSubmix> SubmixA;
+
+	UPROPERTY()
+	TObjectPtr<USoundSubmix> SubmixB;
+
+	// Convolution effect presets (loaded automatically from Content/)
+	UPROPERTY()
+	TObjectPtr<class USubmixEffectConvolutionReverbPreset> ConvolutionPresetA;
+
+	UPROPERTY()
+	TObjectPtr<class USubmixEffectConvolutionReverbPreset> ConvolutionPresetB;
 
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> ActiveVolumes;
 
 	UPROPERTY()
 	TObjectPtr<AActor> CurrentActiveVolume;
+
+	UPROPERTY()
+	TObjectPtr<AActor> PendingVolume;
+
+	// Flag to track if silence is queued (exited all volumes during crossfade)
+	bool bPendingSilence = false;
+
+	// Which submix is currently active (true = A, false = B)
+	bool bSubmixAActive = true;
+
+	// Track if we're currently in a volume (both submixes at 0 if false)
+	bool bPreviouslyInVolume = false;
+
+	// Crossfade state
+	ECrossfadeState CrossfadeState = ECrossfadeState::Idle;
+	float CrossfadeProgress = 0.0f;
+	float CrossfadeDuration = 1.0f;
+	
+	FTimerHandle CrossfadeTimerHandle;
 };

@@ -19,7 +19,9 @@ public class SubmixManagement : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                "AudioMixer",
+                "Synthesis"
             }
         );
     }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "EffectConvolutionReverb.h"
 #include "IRConvolutionVolume.generated.h"
 
 UCLASS()
@@ -23,6 +24,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution")
 	float CrossfadeDuration = 1.0f;
+
+	// Reference to the impulse response for this volume
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution")
+	TObjectPtr<UAudioImpulseResponse> ImpulseResponse;
 
 protected:
 	virtual void BeginPlay() override;
