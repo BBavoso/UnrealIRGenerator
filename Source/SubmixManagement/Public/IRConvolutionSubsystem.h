@@ -7,6 +7,16 @@
 #include "Sound/SoundSubmix.h"
 #include "IRConvolutionSubsystem.generated.h"
 
+/*
+ * ZZZZZZZZZZZZZ
+ * TODO:
+ * Clean up this to no longer need so many bool variables.
+ * The System should be able to operate just based on the current volume and pending volume
+ * if the current volume in null then we know we are coming from silence
+ * if the pending is null then we want to fade to silence
+ * if that doesn't work the logic should be moved into the crossfade state
+*/
+
 UENUM()
 enum class ECrossfadeState : uint8
 {
@@ -80,6 +90,6 @@ private:
 	ECrossfadeState CrossfadeState = ECrossfadeState::Idle;
 	float CrossfadeProgress = 0.0f;
 	float CrossfadeDuration = 1.0f;
-	
+
 	FTimerHandle CrossfadeTimerHandle;
 };

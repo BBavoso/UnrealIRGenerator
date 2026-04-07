@@ -33,49 +33,24 @@ void UIRConvolutionSubsystem::Deinitialize()
 
 void UIRConvolutionSubsystem::LoadPluginAssets()
 {
-	// Load submixes from plugin Content folder
+	// Load submixes
 	SubmixA = LoadObject<USoundSubmix>(nullptr, TEXT("/IRGenerator/SM_ConvolutionSubmixA"));
 	SubmixB = LoadObject<USoundSubmix>(nullptr, TEXT("/IRGenerator/SM_ConvolutionSubmixB"));
 	
-	if (!SubmixA)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load SubmixA from /IRGenerator/SM_ConvolutionSubmixA"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Loaded SubmixA: %s"), *SubmixA->GetName());
-	}
-	
-	if (!SubmixB)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load SubmixB from /IRGenerator/SM_ConvolutionSubmixB"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Loaded SubmixB: %s"), *SubmixB->GetName());
-	}
-
-	// Load convolution effect presets
+	// Load Convolution Reverb Effects
 	ConvolutionPresetA = LoadObject<USubmixEffectConvolutionReverbPreset>(nullptr, TEXT("/IRGenerator/SEP_ConvolutionA"));
 	ConvolutionPresetB = LoadObject<USubmixEffectConvolutionReverbPreset>(nullptr, TEXT("/IRGenerator/SEP_ConvolutionB"));
-
-	if (!ConvolutionPresetA)
+	
+	if (!SubmixA || !SubmixB || !ConvolutionPresetA || !ConvolutionPresetB)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load ConvolutionPresetA from /IRGenerator/SEP_ConvolutionA"));
+		UE_LOG(LogTemp, Error, TEXT("Failed to load plugin assets"));
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Loaded ConvolutionPresetA: %s"), *ConvolutionPresetA->GetName());
-	}
-
-	if (!ConvolutionPresetB)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load ConvolutionPresetB from /IRGenerator/SEP_ConvolutionB"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Loaded ConvolutionPresetB: %s"), *ConvolutionPresetB->GetName());
-	}
+	
+	UE_LOG(LogTemp, Log, TEXT("Loaded SubmixA: %s"), *SubmixA->GetName());
+	UE_LOG(LogTemp, Log, TEXT("Loaded SubmixB: %s"), *SubmixB->GetName());
+	UE_LOG(LogTemp, Log, TEXT("Loaded ConvolutionPresetA: %s"), *ConvolutionPresetA->GetName());
+	UE_LOG(LogTemp, Log, TEXT("Loaded ConvolutionPresetB: %s"), *ConvolutionPresetB->GetName());
 }
 
 void UIRConvolutionSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -149,46 +124,46 @@ void UIRConvolutionSubsystem::UpdateActiveVolume()
 	}
 
 	// Check if active volume changed
-	if (NewActiveVolume != CurrentActiveVolume)
+	if (NewActiveVolume == CurrentActiveVolume)
 	{
-		AIRConvolutionVolume* TargetVolume = Cast<AIRConvolutionVolume>(NewActiveVolume);
+		return;
+	}
 
-		if (TargetVolume)
+	if (AIRConvolutionVolume* TargetVolume = Cast<AIRConvolutionVolume>(NewActiveVolume))
+	{
+		UE_LOG(LogTemp, Warning, TEXT(">>> ACTIVE VOLUME CHANGED: %s (Priority: %d)"), 
+		       *TargetVolume->GetName(), TargetVolume->Priority);
+
+		// If currently crossfading, queue the new volume
+		if (CrossfadeState == ECrossfadeState::Crossfading)
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>> ACTIVE VOLUME CHANGED: %s (Priority: %d)"), 
-				*TargetVolume->GetName(), TargetVolume->Priority);
-
-			// If currently crossfading, queue the new volume
-			if (CrossfadeState == ECrossfadeState::Crossfading)
-			{
-				PendingVolume = NewActiveVolume;
-				bPendingSilence = false; // Clear silence flag, we have a new volume queued
-				UE_LOG(LogTemp, Warning, TEXT("Crossfade in progress, queueing volume: %s"), *TargetVolume->GetName());
-			}
-			else
-			{
-				// Start crossfade immediately
-				CurrentActiveVolume = NewActiveVolume;
-				StartCrossfade(TargetVolume);
-			}
+			PendingVolume = NewActiveVolume;
+			bPendingSilence = false; // Clear silence flag, we have a new volume queued
+			UE_LOG(LogTemp, Warning, TEXT("Crossfade in progress, queueing volume: %s"), *TargetVolume->GetName());
 		}
 		else
 		{
-			// No active volume (player exited all volumes)
-			CurrentActiveVolume = nullptr;
+			// Start crossfade immediately
+			CurrentActiveVolume = NewActiveVolume;
+			StartCrossfade(TargetVolume);
+		}
+	}
+	else
+	{
+		// No active volume (player exited all volumes)
+		CurrentActiveVolume = nullptr;
 			
-			if (CrossfadeState == ECrossfadeState::Crossfading)
-			{
-				PendingVolume = nullptr;
-				bPendingSilence = true;
-				UE_LOG(LogTemp, Warning, TEXT("No active volume, queueing silence"));
-			}
-			else
-			{
-				// Fade out current submix to silence
-				UE_LOG(LogTemp, Warning, TEXT(">>> ACTIVE VOLUME: None (fading to silence)"));
-				StartFadeToSilence();
-			}
+		if (CrossfadeState == ECrossfadeState::Crossfading)
+		{
+			PendingVolume = nullptr;
+			bPendingSilence = true;
+			UE_LOG(LogTemp, Warning, TEXT("No active volume, queueing silence"));
+		}
+		else
+		{
+			// Fade out current submix to silence
+			UE_LOG(LogTemp, Warning, TEXT(">>> ACTIVE VOLUME: None (fading to silence)"));
+			StartFadeToSilence();
 		}
 	}
 }
@@ -268,7 +243,7 @@ void UIRConvolutionSubsystem::StartFadeToSilence()
 	{
 		World->GetTimerManager().SetTimer(
 			CrossfadeTimerHandle,
-			[this]()
+			[this]
 			{
 				if (UWorld* World = GetWorld())
 				{
