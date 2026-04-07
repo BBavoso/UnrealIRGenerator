@@ -9,7 +9,8 @@ public class SubmixManagement : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core",
+                "Core", 
+                "Synthesis",
             }
         );
 

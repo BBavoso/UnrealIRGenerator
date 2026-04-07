@@ -2,6 +2,7 @@
 
 #include "IRConvolutionVolume.h"
 #include "IRConvolutionSubsystem.h"
+#include "Engine/World.h"
 
 AIRConvolutionVolume::AIRConvolutionVolume()
 {

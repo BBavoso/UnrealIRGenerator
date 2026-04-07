@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Sound/SoundSubmix.h"
+#include "SubmixEffects/SubmixEffectConvolutionReverb.h"
+#include "IRConvolutionVolume.h"
 #include "IRConvolutionSubsystem.generated.h"
 
 /*
@@ -20,76 +22,77 @@
 UENUM()
 enum class ECrossfadeState : uint8
 {
-	Idle,
-	Crossfading
+	Silent,
+	FromSilence,
+	SubmixAActive,
+	CrossfadeAToB,
+	CrossfadeAToSilence,
+	SubmixBActive,
+	CrossfadeBToA,
+	CrossfadeBToSilence,
 };
 
 /**
  * Manages dynamic IR convolution reverb based on player position in volumes
  */
 UCLASS()
-class SUBMIXMANAGEMENT_API UIRConvolutionSubsystem : public UWorldSubsystem
+class SUBMIXMANAGEMENT_API UIRConvolutionSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual TStatId GetStatId() const override;
 
 	// Called by volume actors when player enters
-	UFUNCTION()
-	void NotifyVolumeEntered(AActor* Volume, AActor* OverlappingActor);
+	void NotifyVolumeEntered(TObjectPtr<AIRConvolutionVolume> Volume, AActor* OverlappingActor);
 
 	// Called by volume actors when player exits
-	UFUNCTION()
-	void NotifyVolumeExited(AActor* Volume, AActor* OverlappingActor);
+	void NotifyVolumeExited(TObjectPtr<AIRConvolutionVolume> Volume, AActor* OverlappingActor);
 
 private:
 	void LoadPluginAssets();
 	void UpdateActiveVolume();
-	void StartCrossfade(class AIRConvolutionVolume* TargetVolume);
-	void StartFadeToSilence();
-	void TickCrossfade(float DeltaTime);
+	void StartCrossfade(AIRConvolutionVolume* TargetVolume, ECrossfadeState NewCrossfadeState
+	                    , TObjectPtr<USoundSubmix> SubmixToUse);
 	void ApplyIRToSubmix(USoundSubmix* Submix, class UAudioImpulseResponse* ImpulseResponse);
 	void SetSubmixVolume(USoundSubmix* Submix, float Volume);
 
-	// Plugin submixes (loaded automatically from Content/)
+	// Plugin submixes
+	// These are loaded from the plugin content folder and should always exist
 	UPROPERTY()
 	TObjectPtr<USoundSubmix> SubmixA;
 
 	UPROPERTY()
 	TObjectPtr<USoundSubmix> SubmixB;
 
-	// Convolution effect presets (loaded automatically from Content/)
+	// Convolution effect presets
+	// These are loaded from the plugin content folder and should always exist
+	// These effects should be already in the submixes
 	UPROPERTY()
-	TObjectPtr<class USubmixEffectConvolutionReverbPreset> ConvolutionPresetA;
-
-	UPROPERTY()
-	TObjectPtr<class USubmixEffectConvolutionReverbPreset> ConvolutionPresetB;
-
-	UPROPERTY()
-	TArray<TObjectPtr<AActor>> ActiveVolumes;
+	TObjectPtr<USubmixEffectConvolutionReverbPreset> ConvolutionPresetA;
 
 	UPROPERTY()
-	TObjectPtr<AActor> CurrentActiveVolume;
+	TObjectPtr<USubmixEffectConvolutionReverbPreset> ConvolutionPresetB;
 
 	UPROPERTY()
-	TObjectPtr<AActor> PendingVolume;
+	TArray<TObjectPtr<AIRConvolutionVolume>> ActiveVolumes;
 
-	// Flag to track if silence is queued (exited all volumes during crossfade)
-	bool bPendingSilence = false;
+	// Either the current volume, or the volume that we are actively crossfading to
+	UPROPERTY()
+	TObjectPtr<AIRConvolutionVolume> CurrentActiveVolume;
 
-	// Which submix is currently active (true = A, false = B)
-	bool bSubmixAActive = true;
-
-	// Track if we're currently in a volume (both submixes at 0 if false)
-	bool bPreviouslyInVolume = false;
+	// The Volume we eventually want to get to
+	// This will be equal to CurrentActiveVolume unless we enter/exit a volume during a crossfade
+	UPROPERTY()
+	TObjectPtr<AIRConvolutionVolume> QueuedActiveVolume;
 
 	// Crossfade state
-	ECrossfadeState CrossfadeState = ECrossfadeState::Idle;
+	ECrossfadeState CrossfadeState = ECrossfadeState::Silent;
+
 	float CrossfadeProgress = 0.0f;
 	float CrossfadeDuration = 1.0f;
-
-	FTimerHandle CrossfadeTimerHandle;
 };
