@@ -112,8 +112,8 @@ MaterialCoefficients LookupCoefficients(const EPhysicalSurface& Material)
 	case SurfaceType2:
 		return {0.02f, 0.03f, 0.03f, 0.03f, 0.04f, 0.07f};
 	default:
-		return {0.05f, 0.04f, 0.02f, 0.04f, 0.05f, 0.05f};
-		// return {0.8f, 0.7f, 0.7f, 0.7f, 0.7f, 0.8f};
+		// return {0.05f, 0.04f, 0.02f, 0.04f, 0.05f, 0.05f};
+		return {0.8f, 0.7f, 0.7f, 0.7f, 0.7f, 0.8f};
 	}
 }
 
@@ -327,7 +327,7 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 
 	UE_LOG(LogTemp, Warning, TEXT("Running DSP"));
 	UE_LOG(LogTemp, Warning, TEXT("Should be %f seconds"), Impulses.Last().GetDelaySeconds() + LengthSeconds);
-	Audio::TSampleBuffer SampleBuffer = IR_Generator_DSP::RunDSP(Impulses);
+	Audio::TSampleBuffer SampleBuffer = IR_Generator_DSP::RunDSP(Impulses, AcousticAbsorption, AtmosphericAbsorption);
 	UE_LOG(LogTemp, Warning, TEXT("Buffer finished with %i samples"), SampleBuffer.GetNumSamples());
 
 	UE_LOG(LogTemp, Warning, TEXT("Writing to wav"));

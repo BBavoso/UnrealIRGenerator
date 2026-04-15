@@ -4,7 +4,10 @@
 #include "AtmosphericFilterCutoffSolver.h"
 
 
-Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(TArray<Impulse>& InImpulses)
+Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(
+	TArray<Impulse>& InImpulses,
+	bool ApplyAcousticAbsorption,
+	bool ApplyAtmosphericAbsorption)
 {
 	uint64 TotalLengthSamples = InImpulses.Last().StartSample + LengthSamples + 1;
 	UE_LOG(LogTemp, Warning, TEXT("Should be %i samples"), TotalLengthSamples);
@@ -21,7 +24,8 @@ Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(TArray<Impulse>& InImpulses)
 
 	for (TUniquePtr<PlayingImpulse>& PlayingImpulse : PlayingImpulses)
 	{
-		TArray<float> RenderedImpulse = PlayingImpulse->RenderImpulse();
+		TArray<float> RenderedImpulse = PlayingImpulse->RenderImpulse(ApplyAcousticAbsorption,
+		                                                              ApplyAtmosphericAbsorption);
 		for (uint64 Clock = 0; Clock < LengthSamples; ++Clock)
 		{
 			Buffer[Clock + PlayingImpulse->StartSample] += RenderedImpulse[Clock];
@@ -33,56 +37,57 @@ Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(TArray<Impulse>& InImpulses)
 	return IntBuffer;
 }
 
-void Filters::ApplyFiltersToAudio(TArray<float>& Input, const MaterialCoefficients& DesiredGainValues, double Distance)
+void Filters::ApplyFiltersToAudio(
+	TArray<float>& Input,
+	const MaterialCoefficients& DesiredGainValues,
+	double Distance,
+	bool ApplyAcousticAbsorption,
+	bool ApplyAtmosphericAbsorption)
 {
-	Filter0.Init(SampleRate, 1, Audio::EBiquadFilter::LowShelf, 125);
-	Filter1.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 125);
-	Filter2.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 250);
-	Filter3.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 500);
-	Filter4.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 1000);
-	Filter5.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 2000);
-	Filter6.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 4000);
-	
-	
-	MaterialCoefficients AdjustedGainValues = GetAdjustedGainValues(DesiredGainValues);
-	
-	// UE_LOG(LogTemp, Warning, TEXT("125 gain db %f"), AdjustedGainValues[0]);
-	
-	// Filter0.SetGainDB(AdjustedGainValues[0]);
-	// Filter1.SetGainDB(AdjustedGainValues[0]);
-	// Filter2.SetGainDB(AdjustedGainValues[1]);
-	// Filter3.SetGainDB(AdjustedGainValues[2]);
-	// Filter4.SetGainDB(AdjustedGainValues[3]);
-	// Filter5.SetGainDB(AdjustedGainValues[4]);
-	// Filter6.SetGainDB(AdjustedGainValues[5]);
-	//
-	// Filter0.SetEnabled(true);
-	// Filter1.SetEnabled(true);
-	// Filter2.SetEnabled(true);
-	// Filter3.SetEnabled(true);
-	// Filter4.SetEnabled(true);
-	// Filter5.SetEnabled(true);
-	// Filter6.SetEnabled(true);
-	//
-	// Filter0.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter1.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter2.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter3.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter4.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter5.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	// Filter6.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
-	
-	
-	AtmosphericFilterCutoffSolver solver = AtmosphericFilterCutoffSolver(HumidityPercent, TemperatureFahrenheit);
-	auto lowPassFrequency = solver.Solve(Distance);
-	
-	AtmosphericLowpass.Init(SampleRate, 1, Audio::EBiquadFilter::Lowpass, lowPassFrequency);
-	AtmosphericLowpass.SetEnabled(true);
-	
-	AtmosphericLowpass.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+	if (ApplyAcousticAbsorption)
+	{
+		MaterialCoefficients AdjustedGainValues = GetAdjustedGainValues(DesiredGainValues);
+
+		UE_LOG(LogTemp, Warning, TEXT("125 gain db %f"), AdjustedGainValues[0]);
+
+		Filter0.Init(SampleRate, 1, Audio::EBiquadFilter::LowShelf, 125, 1, AdjustedGainValues[0]);
+		Filter1.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 125, 1, AdjustedGainValues[0]);
+		Filter2.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 250, 1, AdjustedGainValues[1]);
+		Filter3.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 500, 1, AdjustedGainValues[2]);
+		Filter4.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 1000, 1, AdjustedGainValues[3]);
+		Filter5.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 2000, 1, AdjustedGainValues[4]);
+		Filter6.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 4000, 1, AdjustedGainValues[5]);
+
+		Filter0.SetEnabled(true);
+		Filter1.SetEnabled(true);
+		Filter2.SetEnabled(true);
+		Filter3.SetEnabled(true);
+		Filter4.SetEnabled(true);
+		Filter5.SetEnabled(true);
+		Filter6.SetEnabled(true);
+
+		Filter0.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter1.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter2.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter3.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter4.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter5.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+		Filter6.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+	}
+
+	if (ApplyAtmosphericAbsorption)
+	{
+		AtmosphericFilterCutoffSolver solver = AtmosphericFilterCutoffSolver(HumidityPercent, TemperatureFahrenheit);
+		auto lowPassFrequency = solver.Solve(Distance);
+
+		AtmosphericLowpass.Init(SampleRate, 1, Audio::EBiquadFilter::Lowpass, lowPassFrequency);
+		AtmosphericLowpass.SetEnabled(true);
+
+		AtmosphericLowpass.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
+	}
 }
 
-TArray<float> PlayingImpulse::RenderImpulse()
+TArray<float> PlayingImpulse::RenderImpulse(bool ApplyAcousticAbsorption, bool ApplyAtmosphericAbsorption)
 {
 	Audio::FWhiteNoise Noise{};
 
@@ -96,7 +101,13 @@ TArray<float> PlayingImpulse::RenderImpulse()
 		Buffer[Clock] *= CalculateFadeGain(Clock);
 	}
 
-	EQs.ApplyFiltersToAudio(Buffer, DesiredGainValues, DistanceTraveledMeters);
+	EQs.ApplyFiltersToAudio(
+		Buffer,
+		DesiredGainValues,
+		DistanceTraveledMeters,
+		ApplyAcousticAbsorption,
+		ApplyAtmosphericAbsorption
+	);
 
 	return Buffer;
 }

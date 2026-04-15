@@ -12,13 +12,6 @@
 // Minimum
 constexpr float TimeStep = 0.001f;
 
-
-
-
-
-
-
-
 UCLASS()
 class IRPROBE_API AIR_Generator : public AActor
 {
@@ -64,6 +57,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	FString FileName = "GeneratedImpulseResponse";
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
+	bool AcousticAbsorption = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
+	bool AtmosphericAbsorption = false;
 
 private:
 	static void MergeImpulses(TArray<Impulse>& Impulses);

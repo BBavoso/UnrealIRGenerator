@@ -23,6 +23,7 @@ inline MaterialCoefficients GetAdjustedGainValues(
 {
 	MaterialCoefficients ReturnValue;
 	ReturnValue[0] = Audio::ConvertToDecibels(DesiredGainValues[0]);
+	// ReturnValue[0] = FMath::Clamp(ReturnValue[0], -32.0f, 32.0f);
 	float AccumulatedGain = 0.0f;
 	for (int i = 1; i < NumFrequencyBands; i++)
 	{
@@ -46,7 +47,8 @@ inline uint64 FadeOutStart = LengthSamples - FadeOutTimeSamples;
 class Filters
 {
 public:
-	void ApplyFiltersToAudio(TArray<float>& Input, const MaterialCoefficients& DesiredGainValues, double Distance);
+	void ApplyFiltersToAudio(TArray<float>& Input, const MaterialCoefficients& DesiredGainValues, double Distance, bool ApplyAcousticAbsorption, bool
+	                         ApplyAtmosphericAbsorption);
 
 private:
 	Audio::FBiquadFilter Filter0;
@@ -98,7 +100,7 @@ constexpr float GetDistanceAttenuationDB(float DistanceMeters)
 
 struct PlayingImpulse
 {
-	TArray<float> RenderImpulse();
+	TArray<float> RenderImpulse(bool ApplyAcousticAbsorption, bool ApplyAtmosphericAbsorption);
 
 
 
@@ -148,5 +150,5 @@ private:
 class IR_Generator_DSP
 {
 public:
-	static Audio::TSampleBuffer<> RunDSP(TArray<Impulse>& InImpulses);
+	static Audio::TSampleBuffer<> RunDSP(TArray<Impulse>& InImpulses, bool ApplyAcousticAbsorption, bool ApplyAtmosphericAbsorption);
 };
