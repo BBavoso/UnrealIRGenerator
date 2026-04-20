@@ -23,5 +23,15 @@ public class IRProbe : ModuleRules
                 "SignalProcessing"
             }
         );
+
+        PrivateDependencyModuleNames.Add("Synthesis");
+
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.Add("AssetTools");
+            PrivateDependencyModuleNames.Add("AudioEditor");
+            PrivateDependencyModuleNames.Add("SynthesisEditor");
+            PrivateDependencyModuleNames.Add("UnrealEd");
+        }
     }
 }

@@ -63,6 +63,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	bool AtmosphericAbsorption = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
+	bool BakeProbe = false;
 
 private:
 	static void MergeImpulses(TArray<Impulse>& Impulses);

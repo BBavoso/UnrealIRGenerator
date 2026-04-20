@@ -11,6 +11,17 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "EffectConvolutionReverb.h"
+
+#if WITH_EDITOR
+#include "AssetToolsModule.h"
+#include "Factories/SoundFactory.h"
+#include "AudioImpulseResponseAsset.h"
+#include "HAL/FileManager.h"
+#include "Misc/PackageName.h"
+#include "Misc/Paths.h"
+#include "Sound/SoundWave.h"
+#endif
 
 constexpr float ListenerSphereRadius = 15.0f;
 constexpr float MaxRaycastDistance = 10000.0f;
@@ -316,6 +327,7 @@ void AIR_Generator::CalculateImpulseStarts(TArray<Impulse>& Impulses)
 }
 
 
+#if WITH_EDITOR
 void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 {
 	TArray<Impulse> Impulses = CastRays(Sphere->GetComponentLocation());
@@ -332,9 +344,46 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 
 	UE_LOG(LogTemp, Warning, TEXT("Writing to wav"));
 	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
-	// WaveWriter.SynchronouslyWriteToWavFile(
-	// 	SampleBuffer, FileName,
-	// 	FString(
-	// 		"/Users/bbavoso/Documents/Unreal Projects/EP491_Jury/Content/JuryDemo/Generated_IRs"));
-	WaveWriter.SynchronouslyWriteToWavFile(SampleBuffer, FileName, FString("."));
+	const FString GeneratedDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("GeneratedIR"));
+	IFileManager::Get().MakeDirectory(*GeneratedDirectory, true);
+	WaveWriter.SynchronouslyWriteToWavFile(SampleBuffer, FileName, GeneratedDirectory);
+
+	const FString WavFilePath = FPaths::Combine(GeneratedDirectory, FileName + TEXT(".wav"));
+
+	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	USoundFactory* SoundFactory = NewObject<USoundFactory>();
+	TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssets(
+		{WavFilePath},
+		TEXT("/Game/GeneratedIR"),
+		SoundFactory,
+		false);
+
+	USoundWave* ImportedWave = nullptr;
+	for (UObject* ImportedAsset : ImportedAssets)
+	{
+		ImportedWave = Cast<USoundWave>(ImportedAsset);
+		if (ImportedWave)
+		{
+			break;
+		}
+	}
+
+	if (!ImportedWave)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to import generated wav as a SoundWave"));
+		return;
+	}
+
+	UAudioImpulseResponseFactory* Factory = NewObject<UAudioImpulseResponseFactory>();
+	Factory->StagedSoundWave = ImportedWave;
+
+	FString PackagePath;
+	FString AssetName;
+	AssetToolsModule.Get().CreateUniqueAssetName(ImportedWave->GetOutermost()->GetName(), TEXT("_IR"), PackagePath, AssetName);
+	AssetToolsModule.Get().CreateAsset(
+		AssetName,
+		FPackageName::GetLongPackagePath(PackagePath),
+		UAudioImpulseResponse::StaticClass(),
+		Factory);
 }
+#endif
