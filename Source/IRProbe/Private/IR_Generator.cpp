@@ -358,19 +358,16 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 		SoundFactory,
 		false);
 
-	USoundWave* ImportedWave = nullptr;
-	for (UObject* ImportedAsset : ImportedAssets)
+	if (ImportedAssets.IsEmpty())
 	{
-		ImportedWave = Cast<USoundWave>(ImportedAsset);
-		if (ImportedWave)
-		{
-			break;
-		}
+		UE_LOG(LogTemp, Error, TEXT("Failed to import generated wav"));
+		return;
 	}
 
+	USoundWave* ImportedWave = Cast<USoundWave>(ImportedAssets[0]);
 	if (!ImportedWave)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to import generated wav as a SoundWave"));
+		UE_LOG(LogTemp, Error, TEXT("Imported asset is not a SoundWave"));
 		return;
 	}
 
