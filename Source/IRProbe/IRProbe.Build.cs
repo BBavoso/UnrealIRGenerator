@@ -19,6 +19,7 @@ public class IRProbe : ModuleRules {
 				"SlateCore",
 				"SignalProcessing",
 				"Synthesis",
+				"ImpulseGenerationSettings"
 			}
 		);
 

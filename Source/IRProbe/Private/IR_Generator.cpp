@@ -14,6 +14,7 @@
 #include "EffectConvolutionReverb.h"
 
 #if WITH_EDITOR
+#include "ImpulseGenerationSettings/Public/SurfaceAbsorptionSettings.h"
 #include "AssetToolsModule.h"
 #include "Factories/SoundFactory.h"
 #include "AudioImpulseResponseAsset.h"
@@ -102,6 +103,15 @@ void AIR_Generator::TestFilter()
 	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
 	WaveWriter.SynchronouslyWriteToWavFile(sbuf, FileName, FString("."));
 }
+
+#if WITH_EDITOR
+void AIR_Generator::TestSettings()
+{
+	const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Test bool is: %s"), Settings->TestBool ? TEXT("true") : TEXT("false"));
+}
+#endif
 
 
 float Impulse::GetDelaySeconds() const

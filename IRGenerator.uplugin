@@ -36,6 +36,11 @@
 			"Name": "SubmixManagement",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ImpulseGenerationSettings",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }

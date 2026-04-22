@@ -12,7 +12,7 @@ public class IRBaking : ModuleRules {
 			"SlateCore",
 			"ToolMenus",
 			"IRProbe",
-			"SubmixManagement"
+			"SubmixManagement",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
