@@ -34,7 +34,10 @@ public:
 	TObjectPtr<AIR_Generator> IrGenerator;
 	
 	UFUNCTION(CallInEditor, Category = "IR Convolution")
-	void BakeVolume();
+	void UpdateVolumeWithoutGenerating();
+	
+	UFUNCTION(CallInEditor, Category = "IR Convolution")
+	void BakeImpulseAndUpdateVolume();
 
 protected:
 	virtual void BeginPlay() override;

@@ -20,7 +20,24 @@ AIRConvolutionVolume::AIRConvolutionVolume()
 	TriggerBox->SetBoxExtent(FVector(200.0f, 200.0f, 200.0f));
 }
 
-void AIRConvolutionVolume::BakeVolume()
+void AIRConvolutionVolume::UpdateVolumeWithoutGenerating()
+{
+	if (!IrGenerator)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Provide an IR Generator to bake"));
+		return;
+	}	
+	
+	if (!IrGenerator->GeneratedImpulseResponse)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Impulse response has not been generated yet, use 'Bake Impulse and Update Volume'"));
+		return;
+	}
+	
+	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
+}
+
+void AIRConvolutionVolume::BakeImpulseAndUpdateVolume()
 {
 	if (!IrGenerator)
 	{
@@ -29,7 +46,15 @@ void AIRConvolutionVolume::BakeVolume()
 	}	
 	
 	
-	UE_LOG(LogTemp, Warning, TEXT("Provide an IR Generator to bake"));
+	if (!IrGenerator->BakeProbe)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Impulse Response Generator has baking disabled, enable it first to bake it"));
+		return;
+	}
+	
+	IrGenerator->CalculateAndRecordImpulseResponseToFile();
+	
+	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
 }
 
 void AIRConvolutionVolume::BeginPlay()

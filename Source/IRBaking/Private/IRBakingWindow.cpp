@@ -4,6 +4,7 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
 #include "IRProbe/Public/IR_Generator.h"
+#include "SubmixManagement/Public/IRConvolutionVolume.h"
 
 void SIRBakingWindow::Construct(const FArguments& InArgs)
 {
@@ -42,5 +43,28 @@ FReply SIRBakingWindow::BakeAllProbes() const
 	TArray<AActor*> Probes;
 	UGameplayStatics::GetAllActorsOfClass(WorldContext, AIR_Generator::StaticClass(), Probes);
 	UE_LOG(LogTemp, Warning, TEXT("Found %i probes"), Probes.Num());
+
+	for (AActor*& Probe : Probes)
+	{
+		AIR_Generator* generator = Cast<AIR_Generator>(Probe);
+		if (generator->BakeProbe)
+		{
+			generator->CalculateAndRecordImpulseResponseToFile();
+		}
+	}
+
+	TArray<AActor*> ConvolutionVolumes;
+	UGameplayStatics::GetAllActorsOfClass(WorldContext, AIRConvolutionVolume::StaticClass(), ConvolutionVolumes);
+	UE_LOG(LogTemp, Warning, TEXT("Found %i convolution volumes"), ConvolutionVolumes.Num());
+
+	for (AActor*& ConvolutionVolume : ConvolutionVolumes)
+	{
+		AIRConvolutionVolume* volume = Cast<AIRConvolutionVolume>(ConvolutionVolume);
+		if (volume->IrGenerator)
+		{
+			volume->ImpulseResponse = volume->IrGenerator->GeneratedImpulseResponse;
+		}
+	}
+
 	return FReply::Handled();
 }

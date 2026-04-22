@@ -66,7 +66,7 @@ public:
 	bool AtmosphericAbsorption = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
-	bool BakeProbe = false;
+	bool BakeProbe = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	TObjectPtr<UAudioImpulseResponse> GeneratedImpulseResponse;

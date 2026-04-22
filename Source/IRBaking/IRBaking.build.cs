@@ -11,11 +11,12 @@ public class IRBaking : ModuleRules {
 			"Slate",
 			"SlateCore",
 			"ToolMenus",
-			"IRProbe"
+			"IRProbe",
+			"SubmixManagement"
 		});
 
-		PrivateDependencyModuleNames.AddRange( new string[] {
-				"UnrealEd", 
+		PrivateDependencyModuleNames.AddRange(new string[] {
+				"UnrealEd",
 			}
 		);
 	}
