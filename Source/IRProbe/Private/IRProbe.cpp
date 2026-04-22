@@ -4,14 +4,12 @@
 
 void FIRProbeModule::StartupModule()
 {
-    
 }
 
 void FIRProbeModule::ShutdownModule()
 {
-    
 }
 
 #undef LOCTEXT_NAMESPACE
-    
+
 IMPLEMENT_MODULE(FIRProbeModule, IRProbe)

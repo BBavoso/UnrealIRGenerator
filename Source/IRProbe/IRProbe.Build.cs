@@ -1,37 +1,32 @@
 ﻿using UnrealBuildTool;
 
-public class IRProbe : ModuleRules
-{
-    public IRProbe(ReadOnlyTargetRules Target) : base(Target)
-    {
-        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+public class IRProbe : ModuleRules {
+	public IRProbe(ReadOnlyTargetRules Target) : base(Target) {
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core",
-            }
-        );
+		PublicDependencyModuleNames.AddRange(
+			new string[] {
+				"Core",
+				"Synthesis",
+			}
+		);
 
-        PrivateDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "CoreUObject",
-                "Engine",
-                "Slate",
-                "SlateCore",
-                "SignalProcessing"
-            }
-        );
+		PrivateDependencyModuleNames.AddRange(
+			new string[] {
+				"CoreUObject",
+				"Engine",
+				"Slate",
+				"SlateCore",
+				"SignalProcessing",
+				"Synthesis",
+			}
+		);
 
-        PrivateDependencyModuleNames.Add("Synthesis");
-
-        if (Target.bBuildEditor)
-        {
-            PrivateDependencyModuleNames.Add("AssetTools");
-            PrivateDependencyModuleNames.Add("AudioEditor");
-            PrivateDependencyModuleNames.Add("SynthesisEditor");
-            PrivateDependencyModuleNames.Add("UnrealEd");
-        }
-    }
+		if (Target.bBuildEditor) {
+			PrivateDependencyModuleNames.Add("AssetTools");
+			PrivateDependencyModuleNames.Add("AudioEditor");
+			PrivateDependencyModuleNames.Add("SynthesisEditor");
+			PrivateDependencyModuleNames.Add("UnrealEd");
+		}
+	}
 }

@@ -22,7 +22,8 @@ public class SubmixManagement : ModuleRules
                 "Slate",
                 "SlateCore",
                 "AudioMixer",
-                "Synthesis"
+                "Synthesis",
+                "IRProbe"
             }
         );
     }

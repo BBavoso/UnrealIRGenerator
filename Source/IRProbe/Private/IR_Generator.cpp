@@ -272,7 +272,7 @@ TArray<Impulse> AIR_Generator::CastRays(const FVector Center)
 		);
 
 		// Reflect each working vector left around hit normal
-		for (auto& WorkingVector : WorkingVectors)
+		for (Raycast& WorkingVector : WorkingVectors)
 		{
 			FVector Reflection =
 				WorkingVector.R.Direction.MirrorByVector(WorkingVector.Intersection.Normal);
@@ -297,10 +297,10 @@ void AIR_Generator::MergeImpulses(TArray<Impulse>& Impulses)
 
 	for (size_t i = 1; i < NumImpulses; i++)
 	{
-		auto& CurrentImpulse = Impulses[CurrentImpulseIndex];
+		Impulse& CurrentImpulse = Impulses[CurrentImpulseIndex];
 		Impulse& NextImpulse = Impulses[i];
 
-		auto DeltaTime = NextImpulse.GetDelaySeconds() - CurrentImpulse.GetDelaySeconds();
+		float DeltaTime = NextImpulse.GetDelaySeconds() - CurrentImpulse.GetDelaySeconds();
 
 		if (DeltaTime < TimeStep)
 		{
@@ -376,11 +376,17 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 
 	FString PackagePath;
 	FString AssetName;
-	AssetToolsModule.Get().CreateUniqueAssetName(ImportedWave->GetOutermost()->GetName(), TEXT("_IR"), PackagePath, AssetName);
-	AssetToolsModule.Get().CreateAsset(
+	AssetToolsModule.Get().CreateUniqueAssetName(
+		ImportedWave->GetOutermost()->GetName(),
+		TEXT("_IR"),
+		PackagePath,
+		AssetName);
+	UObject* GeneratedIR = AssetToolsModule.Get().CreateAsset(
 		AssetName,
 		FPackageName::GetLongPackagePath(PackagePath),
 		UAudioImpulseResponse::StaticClass(),
 		Factory);
+	
+	GeneratedImpulseResponse = Cast<UAudioImpulseResponse>(GeneratedIR);
 }
 #endif

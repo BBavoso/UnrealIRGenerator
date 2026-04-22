@@ -3,7 +3,7 @@
 #include "SampleBuffer.h"
 #include "DSP/Filter.h"
 
-constexpr int32 SampleRate = 48000;
+constexpr int32 ImpulseSampleRate = 48000;
 
 // Size and shape of impulses
 static float LengthSeconds = 0.05;
@@ -36,7 +36,7 @@ inline MaterialCoefficients GetAdjustedGainValues(
 
 constexpr uint64 GetSamplesFromSeconds(const float Seconds)
 {
-	return Seconds * SampleRate;
+	return Seconds * ImpulseSampleRate;
 }
 
 inline uint64 LengthSamples = GetSamplesFromSeconds(LengthSeconds);

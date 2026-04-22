@@ -20,6 +20,18 @@ AIRConvolutionVolume::AIRConvolutionVolume()
 	TriggerBox->SetBoxExtent(FVector(200.0f, 200.0f, 200.0f));
 }
 
+void AIRConvolutionVolume::BakeVolume()
+{
+	if (!IrGenerator)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Provide an IR Generator to bake"));
+		return;
+	}	
+	
+	
+	UE_LOG(LogTemp, Warning, TEXT("Provide an IR Generator to bake"));
+}
+
 void AIRConvolutionVolume::BeginPlay()
 {
 	Super::BeginPlay();
@@ -53,3 +65,5 @@ void AIRConvolutionVolume::OnBoxEndOverlap(
 		Subsystem->NotifyVolumeExited(this, OtherActor);
 	}
 }
+
+

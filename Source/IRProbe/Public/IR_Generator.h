@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EffectConvolutionReverb.h"
 #include "IR_Generator_DSP.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
@@ -66,6 +67,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	bool BakeProbe = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
+	TObjectPtr<UAudioImpulseResponse> GeneratedImpulseResponse;
 
 private:
 	static void MergeImpulses(TArray<Impulse>& Impulses);

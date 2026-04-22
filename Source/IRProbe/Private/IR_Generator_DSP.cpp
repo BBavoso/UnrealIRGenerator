@@ -32,7 +32,7 @@ Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(
 		}
 	}
 
-	Audio::TSampleBuffer<> IntBuffer = Audio::TSampleBuffer(Buffer.GetData(), Buffer.Num(), 1, SampleRate);
+	Audio::TSampleBuffer<> IntBuffer = Audio::TSampleBuffer(Buffer.GetData(), Buffer.Num(), 1, ImpulseSampleRate);
 
 	return IntBuffer;
 }
@@ -50,13 +50,13 @@ void Filters::ApplyFiltersToAudio(
 
 		UE_LOG(LogTemp, Warning, TEXT("125 gain db %f"), AdjustedGainValues[0]);
 
-		Filter0.Init(SampleRate, 1, Audio::EBiquadFilter::LowShelf, 125, 1, AdjustedGainValues[0]);
-		Filter1.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 125, 1, AdjustedGainValues[0]);
-		Filter2.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 250, 1, AdjustedGainValues[1]);
-		Filter3.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 500, 1, AdjustedGainValues[2]);
-		Filter4.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 1000, 1, AdjustedGainValues[3]);
-		Filter5.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 2000, 1, AdjustedGainValues[4]);
-		Filter6.Init(SampleRate, 1, Audio::EBiquadFilter::HighShelf, 4000, 1, AdjustedGainValues[5]);
+		Filter0.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::LowShelf, 125, 1, AdjustedGainValues[0]);
+		Filter1.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 125, 1, AdjustedGainValues[0]);
+		Filter2.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 250, 1, AdjustedGainValues[1]);
+		Filter3.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 500, 1, AdjustedGainValues[2]);
+		Filter4.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 1000, 1, AdjustedGainValues[3]);
+		Filter5.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 2000, 1, AdjustedGainValues[4]);
+		Filter6.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 4000, 1, AdjustedGainValues[5]);
 
 		Filter0.SetEnabled(true);
 		Filter1.SetEnabled(true);
@@ -80,7 +80,7 @@ void Filters::ApplyFiltersToAudio(
 		AtmosphericFilterCutoffSolver solver = AtmosphericFilterCutoffSolver(HumidityPercent, TemperatureFahrenheit);
 		auto lowPassFrequency = solver.Solve(Distance);
 
-		AtmosphericLowpass.Init(SampleRate, 1, Audio::EBiquadFilter::Lowpass, lowPassFrequency);
+		AtmosphericLowpass.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::Lowpass, lowPassFrequency);
 		AtmosphericLowpass.SetEnabled(true);
 
 		AtmosphericLowpass.ProcessAudio(Input.GetData(), Input.Num(), Input.GetData());
