@@ -38,6 +38,7 @@ public:
 
 	TArray<Impulse> CastRays(const FVector Center);
 
+#if WITH_EDITOR
 	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
 	void CalculateAndRecordImpulseResponseToFile();
 
@@ -48,10 +49,8 @@ public:
 	void TestFilter();
 	
 	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
-	
-	#if WITH_EDITOR
 	void TestSettings();
-	#endif
+#endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	int NumRaycasts = 32000;

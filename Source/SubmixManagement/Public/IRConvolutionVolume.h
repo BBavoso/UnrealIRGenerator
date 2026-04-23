@@ -6,7 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "EffectConvolutionReverb.h"
+
+#if WITH_EDITOR
 #include "IRProbe/Public/IR_Generator.h"
+#endif
 
 #include "IRConvolutionVolume.generated.h"
 
@@ -30,14 +33,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution")
 	TObjectPtr<UAudioImpulseResponse> ImpulseResponse;
 	
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution")
 	TObjectPtr<AIR_Generator> IrGenerator;
-	
+#endif
+
+
+#if WITH_EDITOR
 	UFUNCTION(CallInEditor, Category = "IR Convolution")
 	void UpdateVolumeWithoutGenerating();
 	
 	UFUNCTION(CallInEditor, Category = "IR Convolution")
 	void BakeImpulseAndUpdateVolume();
+#endif
 
 protected:
 	virtual void BeginPlay() override;

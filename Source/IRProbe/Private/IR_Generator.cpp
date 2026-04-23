@@ -2,7 +2,6 @@
 
 
 #include "IR_Generator.h"
-
 #include "IR_Generator_DSP.h"
 #include "Components/SphereComponent.h"
 #include "DSP/Noise.h"
@@ -15,14 +14,15 @@
 
 #if WITH_EDITOR
 #include "ImpulseGenerationSettings/Public/SurfaceAbsorptionSettings.h"
-#include "AssetToolsModule.h"
 #include "Factories/SoundFactory.h"
 #include "AudioImpulseResponseAsset.h"
 #include "HAL/FileManager.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Sound/SoundWave.h"
+#include "AssetToolsModule.h"
 #endif
+
 
 constexpr float ListenerSphereRadius = 15.0f;
 constexpr float MaxRaycastDistance = 10000.0f;
@@ -66,6 +66,7 @@ void AIR_Generator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+#if WITH_EDITOR
 void AIR_Generator::LogImpulseValues()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Running ray casting"));
@@ -103,6 +104,7 @@ void AIR_Generator::TestFilter()
 	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
 	WaveWriter.SynchronouslyWriteToWavFile(sbuf, FileName, FString("."));
 }
+#endif
 
 #if WITH_EDITOR
 void AIR_Generator::TestSettings()

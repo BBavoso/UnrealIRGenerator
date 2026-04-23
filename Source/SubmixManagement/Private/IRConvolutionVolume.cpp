@@ -20,6 +20,7 @@ AIRConvolutionVolume::AIRConvolutionVolume()
 	TriggerBox->SetBoxExtent(FVector(200.0f, 200.0f, 200.0f));
 }
 
+#if WITH_EDITOR
 void AIRConvolutionVolume::UpdateVolumeWithoutGenerating()
 {
 	if (!IrGenerator)
@@ -56,6 +57,7 @@ void AIRConvolutionVolume::BakeImpulseAndUpdateVolume()
 	
 	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
 }
+#endif
 
 void AIRConvolutionVolume::BeginPlay()
 {
