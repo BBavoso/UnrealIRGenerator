@@ -35,6 +35,7 @@ void AIRConvolutionVolume::UpdateVolumeWithoutGenerating()
 		return;
 	}
 	
+	Modify();
 	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
 }
 

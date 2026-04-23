@@ -32,7 +32,7 @@ constexpr float MaxRaycastDistance = 10000.0f;
 AIR_Generator::AIR_Generator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 #if WITH_EDITORONLY_DATA
 	Sphere = CreateEditorOnlyDefaultSubobject<USphereComponent>(TEXT("EditorTraceSphere"));
@@ -59,52 +59,6 @@ void AIR_Generator::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
-// Called every frame
-void AIR_Generator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-#if WITH_EDITOR
-void AIR_Generator::LogImpulseValues()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Running ray casting"));
-	TArray<Impulse> Impulses = CastRays(Sphere->GetComponentLocation());
-	UE_LOG(LogTemp, Warning, TEXT("Found %i impulses"), Impulses.Num())
-	MergeImpulses(Impulses);
-	UE_LOG(LogTemp, Warning, TEXT("Merged, now %i impulses"), Impulses.Num())
-	for (auto& Impulse : Impulses)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Delay - %.3f"), Impulse.GetDelaySeconds());
-	}
-}
-
-void AIR_Generator::TestFilter()
-{
-	// 0-0
-	TArray<float> buf;
-	buf.Reserve(48000);
-
-	Audio::FWhiteNoise noise;
-
-	for (int32 i = 0; i < 48000; i++)
-	{
-		buf.Add(noise.Generate());
-	}
-
-	Audio::FBiquadFilter Filter;
-	Filter.Init(48000, 1, Audio::EBiquadFilter::Lowpass, 500);
-	Filter.SetEnabled(true);
-
-	Filter.ProcessAudio(buf.GetData(), 48000, buf.GetData());
-
-	Audio::TSampleBuffer<> sbuf(buf.GetData(), 48000, 1, 48000);
-
-	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
-	WaveWriter.SynchronouslyWriteToWavFile(sbuf, FileName, FString("."));
-}
-#endif
 
 #if WITH_EDITOR
 void AIR_Generator::TestSettings()
@@ -342,6 +296,7 @@ void AIR_Generator::CalculateImpulseStarts(TArray<Impulse>& Impulses)
 #if WITH_EDITOR
 void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 {
+	
 	TArray<Impulse> Impulses = CastRays(Sphere->GetComponentLocation());
 	UE_LOG(LogTemp, Warning, TEXT("Found %i impulses"), Impulses.Num());
 	MergeImpulses(Impulses);
@@ -399,6 +354,7 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 		UAudioImpulseResponse::StaticClass(),
 		Factory);
 	
+	Modify();
 	GeneratedImpulseResponse = Cast<UAudioImpulseResponse>(GeneratedIR);
 }
 #endif

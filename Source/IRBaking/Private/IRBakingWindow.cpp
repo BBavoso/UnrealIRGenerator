@@ -62,7 +62,7 @@ FReply SIRBakingWindow::BakeAllProbes() const
 		AIRConvolutionVolume* volume = Cast<AIRConvolutionVolume>(ConvolutionVolume);
 		if (volume->IrGenerator)
 		{
-			volume->ImpulseResponse = volume->IrGenerator->GeneratedImpulseResponse;
+			volume->UpdateVolumeWithoutGenerating();
 		}
 	}
 

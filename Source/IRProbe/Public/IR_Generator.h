@@ -19,7 +19,6 @@ class IRPROBE_API AIR_Generator : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AIR_Generator();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Impulse Response Generation")
@@ -33,8 +32,6 @@ protected:
 	USceneComponent* Root;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	TArray<Impulse> CastRays(const FVector Center);
 
@@ -42,12 +39,6 @@ public:
 	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
 	void CalculateAndRecordImpulseResponseToFile();
 
-	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
-	void LogImpulseValues();
-
-	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
-	void TestFilter();
-	
 	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
 	void TestSettings();
 #endif
