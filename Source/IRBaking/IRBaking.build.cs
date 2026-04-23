@@ -16,7 +16,7 @@ public class IRBaking : ModuleRules {
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
-				"UnrealEd",
+				"UnrealEd", "EditorScriptingUtilities", "Synthesis"
 			}
 		);
 	}

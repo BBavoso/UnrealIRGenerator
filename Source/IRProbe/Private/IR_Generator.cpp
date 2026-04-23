@@ -24,7 +24,6 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "AssetImportTask.h"
-#include "FileHelpers.h"
 #endif
 
 
@@ -372,23 +371,18 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 	// Execute via AssetTools
 	AssetToolsModule.Get().ImportAssetTasks({ImportTask});
 	
-	TArray<UObject*> ImportedAssets = ImportTask->GetObjects();
-
-	if (ImportedAssets.IsEmpty())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to import generated wav"));
-		return;
-	}
-
-	USoundWave* ImportedWave = Cast<USoundWave>(ImportedAssets[0]);
+	// Load the imported SoundWave by path
+	FString SoundWavePath = FString::Printf(TEXT("/Game/GeneratedIR/%s"), *FileName);
+	USoundWave* ImportedWave = Cast<USoundWave>(StaticLoadObject(USoundWave::StaticClass(), nullptr, *SoundWavePath));
+	
 	if (!ImportedWave)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Imported asset is not a SoundWave"));
+		UE_LOG(LogTemp, Error, TEXT("Failed to load imported SoundWave at: %s"), *SoundWavePath);
 		return;
 	}
 
-	UAudioImpulseResponseFactory* Factory = NewObject<UAudioImpulseResponseFactory>();
-	Factory->StagedSoundWave = ImportedWave;
+	UAudioImpulseResponseFactory* IRFactory = NewObject<UAudioImpulseResponseFactory>();
+	IRFactory->StagedSoundWave = ImportedWave;
 
 	FString IRAssetPath;
 	FString IRAssetName;
@@ -402,16 +396,15 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 		IRAssetName,
 		FPackageName::GetLongPackagePath(IRAssetPath),
 		UAudioImpulseResponse::StaticClass(),
-		Factory);
+		IRFactory);
+	
+	if (!GeneratedIR)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create IR asset"));
+		return;
+	}
 	
 	Modify();
 	GeneratedImpulseResponse = Cast<UAudioImpulseResponse>(GeneratedIR);
-	
-	
-	UEditorLoadingAndSavingUtils::SaveDirtyPackages(
-		true, true
-	);	
-	
-	UEditorLoadingAndSavingUtils::SaveCurrentLevel();
 }
 #endif
