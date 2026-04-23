@@ -4,7 +4,6 @@
 #include "IR_Generator.h"
 #include "IR_Generator_DSP.h"
 #include "Components/SphereComponent.h"
-#include "DSP/Noise.h"
 #include "Sampling/SphericalFibonacci.h"
 #include "Sound/SampleBufferIO.h"
 #include "Engine/World.h"
@@ -21,6 +20,11 @@
 #include "Misc/Paths.h"
 #include "Sound/SoundWave.h"
 #include "AssetToolsModule.h"
+#include "EditorAssetLibrary.h"
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
+#include "AssetImportTask.h"
+#include "FileHelpers.h"
 #endif
 
 
@@ -296,7 +300,6 @@ void AIR_Generator::CalculateImpulseStarts(TArray<Impulse>& Impulses)
 #if WITH_EDITOR
 void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 {
-	
 	TArray<Impulse> Impulses = CastRays(Sphere->GetComponentLocation());
 	UE_LOG(LogTemp, Warning, TEXT("Found %i impulses"), Impulses.Num());
 	MergeImpulses(Impulses);
@@ -313,17 +316,63 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
 	const FString GeneratedDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("GeneratedIR"));
 	IFileManager::Get().MakeDirectory(*GeneratedDirectory, true);
+	
+	const FString WavFilePath = FPaths::Combine(GeneratedDirectory, FileName + TEXT(".wav"));
+	UE_LOG(LogTemp, Warning, TEXT("Checking for existing WAV at: %s"), *WavFilePath);
+	if (IFileManager::Get().FileExists(*WavFilePath))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found existing WAV file, deleting..."));
+		bool bDeleteSuccess = IFileManager::Get().Delete(*WavFilePath);
+		UE_LOG(LogTemp, Warning, TEXT("Delete result: %s"), bDeleteSuccess ? TEXT("SUCCESS") : TEXT("FAILED"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No existing WAV file found"));
+	}
+	
 	WaveWriter.SynchronouslyWriteToWavFile(SampleBuffer, FileName, GeneratedDirectory);
 
-	const FString WavFilePath = FPaths::Combine(GeneratedDirectory, FileName + TEXT(".wav"));
+	// Delete existing SoundWave asset if it exists
+	FString ExistingAssetPath = FString::Printf(TEXT("/Game/GeneratedIR/%s"), *FileName);
+	UE_LOG(LogTemp, Warning, TEXT("Checking for existing asset at: %s"), *ExistingAssetPath);
+	if (UEditorAssetLibrary::DoesAssetExist(ExistingAssetPath))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found existing asset, deleting..."));
+		bool bDeleteSuccess = UEditorAssetLibrary::DeleteAsset(ExistingAssetPath);
+		UE_LOG(LogTemp, Warning, TEXT("Asset delete result: %s"), bDeleteSuccess ? TEXT("SUCCESS") : TEXT("FAILED"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No existing asset found"));
+	}
+
+	// Deselect everything in content browser to prevent template dialog
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	TArray<UObject*> EmptySelection;
+	ContentBrowserModule.Get().SyncBrowserToAssets(EmptySelection, false, false);
 
 	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	
+	// Create and configure the Factory
 	USoundFactory* SoundFactory = NewObject<USoundFactory>();
-	TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssets(
-		{WavFilePath},
-		TEXT("/Game/GeneratedIR"),
-		SoundFactory,
-		false);
+	SoundFactory->bAutoCreateCue = false;
+	// SoundFactory->bTextMode = false;
+	SoundFactory->bEditorImport = true;
+
+	// Set up the Import Task
+	UAssetImportTask* ImportTask = NewObject<UAssetImportTask>();
+	ImportTask->Filename = WavFilePath;
+	ImportTask->DestinationPath = TEXT("/Game/GeneratedIR");
+	ImportTask->DestinationName = FileName;
+	ImportTask->Factory = SoundFactory;
+	ImportTask->bAutomated = true;
+	ImportTask->bReplaceExisting = true;
+	ImportTask->bSave = true;
+
+	// Execute via AssetTools
+	AssetToolsModule.Get().ImportAssetTasks({ImportTask});
+	
+	TArray<UObject*> ImportedAssets = ImportTask->GetObjects();
 
 	if (ImportedAssets.IsEmpty())
 	{
@@ -341,20 +390,28 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 	UAudioImpulseResponseFactory* Factory = NewObject<UAudioImpulseResponseFactory>();
 	Factory->StagedSoundWave = ImportedWave;
 
-	FString PackagePath;
-	FString AssetName;
+	FString IRAssetPath;
+	FString IRAssetName;
 	AssetToolsModule.Get().CreateUniqueAssetName(
-		ImportedWave->GetOutermost()->GetName(),
-		TEXT("_IR"),
-		PackagePath,
-		AssetName);
+		FString::Printf(TEXT("/Game/GeneratedIR/%s_IR"), *FileName),
+		TEXT(""),
+		IRAssetPath,
+		IRAssetName);
+	
 	UObject* GeneratedIR = AssetToolsModule.Get().CreateAsset(
-		AssetName,
-		FPackageName::GetLongPackagePath(PackagePath),
+		IRAssetName,
+		FPackageName::GetLongPackagePath(IRAssetPath),
 		UAudioImpulseResponse::StaticClass(),
 		Factory);
 	
 	Modify();
 	GeneratedImpulseResponse = Cast<UAudioImpulseResponse>(GeneratedIR);
+	
+	
+	UEditorLoadingAndSavingUtils::SaveDirtyPackages(
+		true, true
+	);	
+	
+	UEditorLoadingAndSavingUtils::SaveCurrentLevel();
 }
 #endif

@@ -19,7 +19,7 @@ public class IRProbe : ModuleRules {
 				"SlateCore",
 				"SignalProcessing",
 				"Synthesis",
-				"ImpulseGenerationSettings"
+				"ImpulseGenerationSettings",
 			}
 		);
 
@@ -28,6 +28,8 @@ public class IRProbe : ModuleRules {
 			PrivateDependencyModuleNames.Add("AudioEditor");
 			PrivateDependencyModuleNames.Add("SynthesisEditor");
 			PrivateDependencyModuleNames.Add("UnrealEd");
+			PrivateDependencyModuleNames.Add("EditorScriptingUtilities");
+			PrivateDependencyModuleNames.Add("ContentBrowser");
 		}
 	}
 }
