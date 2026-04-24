@@ -11,6 +11,8 @@ public class ImpulseGenerationSettings : ModuleRules
             {
                 "Core",
                 "DeveloperSettings",
+                "Chaos",
+                "PhysicsCore",
             }
         );
 

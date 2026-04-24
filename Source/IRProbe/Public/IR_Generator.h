@@ -32,15 +32,11 @@ protected:
 	USceneComponent* Root;
 
 public:
-
 	TArray<Impulse> CastRays(const FVector Center);
 
 #if WITH_EDITOR
 	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
 	void CalculateAndRecordImpulseResponseToFile();
-
-	UFUNCTION(CallInEditor, Category = "Impulse Response Generation")
-	void TestSettings();
 #endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
@@ -54,16 +50,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	FString FileName = "GeneratedImpulseResponse";
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	bool AcousticAbsorption = false;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	bool AtmosphericAbsorption = false;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	bool BakeProbe = true;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	TObjectPtr<UAudioImpulseResponse> GeneratedImpulseResponse;
 

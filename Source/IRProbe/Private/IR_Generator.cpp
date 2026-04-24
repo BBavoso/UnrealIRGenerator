@@ -63,14 +63,6 @@ void AIR_Generator::BeginPlay()
 	Super::BeginPlay();
 }
 
-#if WITH_EDITOR
-void AIR_Generator::TestSettings()
-{
-	const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Test bool is: %s"), Settings->TestBool ? TEXT("true") : TEXT("false"));
-}
-#endif
 
 
 float Impulse::GetDelaySeconds() const
