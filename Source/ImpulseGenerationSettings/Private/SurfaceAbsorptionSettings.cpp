@@ -20,7 +20,9 @@ TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const
 	{
 		for (int32 i = 0; i < SurfaceEnum->NumEnums() - 1; ++i)
 		{
-			SurfaceNames.Add(SurfaceEnum->GetNameByIndex(i));
+			const int64 EnumValue = SurfaceEnum->GetValueByIndex(i);
+			const FText DisplayName = SurfaceEnum->GetDisplayNameTextByValue(EnumValue);
+			SurfaceNames.Add(FName(*DisplayName.ToString()));
 		}
 	}
 	

@@ -31,7 +31,9 @@ const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficien
 
 	if (const UEnum* SurfaceEnum = StaticEnum<EPhysicalSurface>())
 	{
-		const FName SurfaceName = SurfaceEnum->GetNameByValue((int64)PhysicalSurface);
+		const int64 EnumValue = (int64)PhysicalSurface;
+		const FText DisplayName = SurfaceEnum->GetDisplayNameTextByValue(EnumValue);
+		const FName SurfaceName = FName(*DisplayName.ToString());
 		const FSurfaceAbsorptionData* AbsorptionData = SurfaceAbsorptionData.Find(SurfaceName);
 		return AbsorptionData ? AbsorptionData->Values : EmptyArray;
 	}
