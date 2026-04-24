@@ -2,7 +2,6 @@
 
 
 #include "SurfaceAbsorptionSubsystem.h"
-#include "SurfaceAbsorptionSettings.h"
 
 
 void USurfaceAbsorptionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -14,14 +13,9 @@ void USurfaceAbsorptionSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 		return;
 	}
 
-	const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
-	if (Settings && !Settings->SurfaceAbsorptionDataTable.IsNull())
+	if (const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>())
 	{
-		SurfaceAbsorptionData = Cast<UDataTable>(Settings->SurfaceAbsorptionDataTable.TryLoad());
-		if (!SurfaceAbsorptionData)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to load Surface Floats Data Table"));
-		}
+		SurfaceAbsorptionData = Settings->SurfaceAbsorptionMap;
 	}
 }
 
@@ -29,7 +23,7 @@ const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficien
 {
 	static const TArray<float> EmptyArray;
 
-	if (!IsEnabled() || !SurfaceAbsorptionData)
+	if (!IsEnabled() || SurfaceAbsorptionData.IsEmpty())
 	{
 		return EmptyArray;
 	}
@@ -40,11 +34,10 @@ const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficien
 		return EmptyArray;
 	}
 
-	const FName RowName = SurfaceEnum->GetNameByValue((int64)PhysicalSurface);
-	const FSurfaceAbsorptionTableRow* Row = SurfaceAbsorptionData->FindRow<FSurfaceAbsorptionTableRow>(
-		RowName, TEXT("USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficients"));
-
-	return Row ? Row->Values : EmptyArray;
+	const FName SurfaceName = SurfaceEnum->GetNameByValue((int64)PhysicalSurface);
+	const FSurfaceAbsorptionData* AbsorptionData = SurfaceAbsorptionData.Find(SurfaceName);
+	
+	return AbsorptionData ? AbsorptionData->Values : EmptyArray;
 }
 
 
@@ -58,5 +51,7 @@ bool USurfaceAbsorptionSubsystem::IsEnabled()
 #endif
 	
 	const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
-	return Settings && !Settings->SurfaceAbsorptionDataTable.IsNull();
+	return Settings->IsValidLowLevel();
 }
+
+

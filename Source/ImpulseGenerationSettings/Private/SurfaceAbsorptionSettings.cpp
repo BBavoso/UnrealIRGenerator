@@ -10,3 +10,22 @@ USurfaceAbsorptionSettings::USurfaceAbsorptionSettings(const FObjectInitializer&
 	
 	SectionName = "Surface Absorption";
 }
+
+TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const
+{
+	TArray<FName> SurfaceNames;
+	
+	const UEnum* SurfaceEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPhysicalSurface"), true);
+	if (!SurfaceEnum)
+	{
+		return SurfaceNames;
+	}
+	
+	// Get all surface type names from the EPhysicalSurface enum
+	for (int32 i = 0; i < SurfaceEnum->NumEnums() - 1; ++i)
+	{
+		SurfaceNames.Add(SurfaceEnum->GetNameByIndex(i));
+	}
+	
+	return SurfaceNames;
+}

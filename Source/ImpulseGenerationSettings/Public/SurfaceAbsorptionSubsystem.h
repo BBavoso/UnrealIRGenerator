@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SurfaceAbsorptionSettings.h"
 #include "Chaos/ChaosEngineInterface.h"
 #include "Engine/DataTable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -29,7 +30,7 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<UDataTable> SurfaceAbsorptionData;
+	TMap<FName, FSurfaceAbsorptionData> SurfaceAbsorptionData;
 
 	static bool IsEnabled();
 };

@@ -10,21 +10,31 @@
 #include "SurfaceAbsorptionSettings.generated.h"
 
 /**
- * Data Table Row for storing Absorption Coefficients per surface
+ * Data structure for storing Absorption Coefficients per surface
  */
 USTRUCT()
-struct FSurfaceAbsorptionTableRow : public FTableRowBase
+struct FSurfaceAbsorptionData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Surface Floats")
 	TArray<float> Values;
+
+	FSurfaceAbsorptionData()
+	{
+		// Initialize with 6 frequency bands (default)
+		Values.SetNum(6);
+		for (int32 i = 0; i < 6; ++i)
+		{
+			Values[i] = 0.5f;
+		}
+	}
 };
 
 /**
  * 
  */
-UCLASS(Config="game", DefaultConfig)
+UCLASS()
 class IMPULSEGENERATIONSETTINGS_API USurfaceAbsorptionSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -33,12 +43,9 @@ public:
 	USurfaceAbsorptionSettings(const FObjectInitializer& ObjectInitializer);
 
 	/**
-	* Data table for storing float values per surface @see FSurfaceFloatTableRow
+	* Map of surface types to their absorption coefficients
 	*/
-	UPROPERTY(config, EditAnywhere, Category = GameplayTags,
-		meta = (
-			AllowedClasses = "/Script/Engine.DataTable",
-			RowType = "/Script/ImpulseGenerationSettings.SurfaceAbsorptionTableRow"
-		))
-	FSoftObjectPath SurfaceAbsorptionDataTable;
+	UPROPERTY(EditAnywhere, Category = "Surface Absorption",
+		meta = (GetKeyOptions = "GetSurfaceOptions"))
+	TMap<FName, FSurfaceAbsorptionData> SurfaceAbsorptionMap;
 };
