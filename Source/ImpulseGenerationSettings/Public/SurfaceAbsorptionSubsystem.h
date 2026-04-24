@@ -13,10 +13,10 @@
  * 
  */
 UCLASS()
-class IMPULSEGENERATIONSETTINGS_API USurfaceAbsorptionSubsystem : public UGameInstanceSubsystem
+class IMPULSEGENERATIONSETTINGS_API USurfaceAbsorptionSubsystem : public UEditorSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
