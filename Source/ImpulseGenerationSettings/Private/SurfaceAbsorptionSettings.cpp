@@ -2,6 +2,7 @@
 
 
 #include "SurfaceAbsorptionSettings.h"
+#include "PhysicsCore.h"
 
 USurfaceAbsorptionSettings::USurfaceAbsorptionSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -15,16 +16,12 @@ TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const
 {
 	TArray<FName> SurfaceNames;
 	
-	const UEnum* SurfaceEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPhysicalSurface"), true);
-	if (!SurfaceEnum)
+	if (const UEnum* SurfaceEnum = StaticEnum<EPhysicalSurface>())
 	{
-		return SurfaceNames;
-	}
-	
-	// Get all surface type names from the EPhysicalSurface enum
-	for (int32 i = 0; i < SurfaceEnum->NumEnums() - 1; ++i)
-	{
-		SurfaceNames.Add(SurfaceEnum->GetNameByIndex(i));
+		for (int32 i = 0; i < SurfaceEnum->NumEnums() - 1; ++i)
+		{
+			SurfaceNames.Add(SurfaceEnum->GetNameByIndex(i));
+		}
 	}
 	
 	return SurfaceNames;

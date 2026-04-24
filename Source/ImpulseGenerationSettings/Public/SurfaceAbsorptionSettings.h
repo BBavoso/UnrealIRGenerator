@@ -41,6 +41,9 @@ class IMPULSEGENERATIONSETTINGS_API USurfaceAbsorptionSettings : public UDevelop
 
 public:
 	USurfaceAbsorptionSettings(const FObjectInitializer& ObjectInitializer);
+	
+	UFUNCTION()
+	TArray<FName> GetSurfaceOptions() const;
 
 	/**
 	* Map of surface types to their absorption coefficients

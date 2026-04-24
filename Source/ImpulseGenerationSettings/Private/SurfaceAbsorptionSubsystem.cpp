@@ -2,6 +2,7 @@
 
 
 #include "SurfaceAbsorptionSubsystem.h"
+#include "PhysicsCore.h"
 
 
 void USurfaceAbsorptionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -28,16 +29,14 @@ const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficien
 		return EmptyArray;
 	}
 
-	const UEnum* SurfaceEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPhysicalSurface"), true);
-	if (!SurfaceEnum)
+	if (const UEnum* SurfaceEnum = StaticEnum<EPhysicalSurface>())
 	{
-		return EmptyArray;
+		const FName SurfaceName = SurfaceEnum->GetNameByValue((int64)PhysicalSurface);
+		const FSurfaceAbsorptionData* AbsorptionData = SurfaceAbsorptionData.Find(SurfaceName);
+		return AbsorptionData ? AbsorptionData->Values : EmptyArray;
 	}
-
-	const FName SurfaceName = SurfaceEnum->GetNameByValue((int64)PhysicalSurface);
-	const FSurfaceAbsorptionData* AbsorptionData = SurfaceAbsorptionData.Find(SurfaceName);
 	
-	return AbsorptionData ? AbsorptionData->Values : EmptyArray;
+	return EmptyArray;
 }
 
 
