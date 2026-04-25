@@ -25,9 +25,7 @@ public:
 	 * @param PhysicalSurface The surface to look up
 	 * @return Array of absorption coefficients for the given surface, empty if not found
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Surface Absorption")
-	const TArray<float>& GetSurfaceAbsorptionCoefficients(EPhysicalSurface PhysicalSurface);
-
+	TArray<float> GetSurfaceAbsorptionCoefficients(EPhysicalSurface PhysicalSurface);
 private:
 	UPROPERTY()
 	TMap<FName, FSurfaceAbsorptionData> SurfaceAbsorptionData;

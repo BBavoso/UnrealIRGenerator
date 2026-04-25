@@ -22,7 +22,7 @@ public:
 	AIR_Generator();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Impulse Response Generation")
-	USphereComponent* Sphere;
+	USphereComponent* ListenerSphere;
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,9 +44,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	int NumBounces = 256;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
-	bool ShowDebugRaycasts = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Impulse Response Generation")
 	FString FileName = "GeneratedImpulseResponse";

@@ -8,8 +8,10 @@
 #include "Sound/SampleBufferIO.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "PhysicsCore.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "EffectConvolutionReverb.h"
+#include "SurfaceAbsorptionSubsystem.h"
 
 #if WITH_EDITOR
 #include "ImpulseGenerationSettings/Public/SurfaceAbsorptionSettings.h"
@@ -38,21 +40,21 @@ AIR_Generator::AIR_Generator()
 	PrimaryActorTick.bCanEverTick = false;
 
 #if WITH_EDITORONLY_DATA
-	Sphere = CreateEditorOnlyDefaultSubobject<USphereComponent>(TEXT("EditorTraceSphere"));
+	ListenerSphere = CreateEditorOnlyDefaultSubobject<USphereComponent>(TEXT("EditorTraceSphere"));
 
-	if (Sphere)
+	if (ListenerSphere)
 	{
-		Sphere->SetupAttachment(RootComponent);
-		Sphere->InitSphereRadius(ListenerSphereRadius);
+		ListenerSphere->SetupAttachment(RootComponent);
+		ListenerSphere->InitSphereRadius(ListenerSphereRadius);
 
-		Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		ListenerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 		// Sphere->SetCollisionObjectType(ECC_WorldDynamic);
 
 		// Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-		Sphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		ListenerSphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
-		Sphere->SetHiddenInGame(true);
+		ListenerSphere->SetHiddenInGame(true);
 	}
 #endif
 }
@@ -64,29 +66,30 @@ void AIR_Generator::BeginPlay()
 }
 
 
-
 float Impulse::GetDelaySeconds() const
 {
 	float DistanceMeters = DistanceTraveled / 100.0f;
-	constexpr float SpeedOfSoundMetersPerSecond = 434.0f;
+	constexpr float SpeedOfSoundMetersPerSecond = 343.0f;
 	return DistanceMeters / SpeedOfSoundMetersPerSecond;
 }
 
 
 MaterialCoefficients LookupCoefficients(const EPhysicalSurface& Material)
 {
-	switch (Material)
+	USurfaceAbsorptionSubsystem* AbsorptionSubsystem = GEditor->GetEditorSubsystem<USurfaceAbsorptionSubsystem>();
+	TArray<float> SurfaceCoefficients = AbsorptionSubsystem->GetSurfaceAbsorptionCoefficients(Material);
+	MaterialCoefficients Result = MaterialCoefficients();
+	for (int i = 0; i < NumFrequencyBands; ++i)
 	{
-	// Wood
-	case SurfaceType1:
-		return {0.19f, 0.23f, 0.25f, 0.30f, 0.37f, 0.42f};
-	// Concrete
-	case SurfaceType2:
-		return {0.02f, 0.03f, 0.03f, 0.03f, 0.04f, 0.07f};
-	default:
-		// return {0.05f, 0.04f, 0.02f, 0.04f, 0.05f, 0.05f};
-		return {0.8f, 0.7f, 0.7f, 0.7f, 0.7f, 0.8f};
+		/**
+		 * The Absorption coefficents mean that 0 is the most reflective (0 absorption) and 1 is the least
+		 * We want to store the Reflectiveness not the Absorption
+		 */
+
+		Result[i] = 1 - SurfaceCoefficients[i];
 	}
+
+	return Result;
 }
 
 MaterialCoefficients AccumulateMaterial(
@@ -144,8 +147,9 @@ TArray<Impulse> AIR_Generator::CastRays(const FVector Center)
 		{
 			FHitResult Intersection;
 			FCollisionQueryParams CollisionParams;
+			CollisionParams.bReturnPhysicalMaterial = true;
 			if (Bounce == 0)
-				CollisionParams.AddIgnoredComponent(Sphere);
+				CollisionParams.AddIgnoredComponent(ListenerSphere);
 			bool bHit = GetWorld()->LineTraceSingleByChannel(
 				Intersection,
 				WorkingVector.R.Origin,
@@ -153,21 +157,7 @@ TArray<Impulse> AIR_Generator::CastRays(const FVector Center)
 				ECC_Visibility,
 				CollisionParams
 			);
-			if (ShowDebugRaycasts)
-			{
-				DrawDebugLine(
-					GetWorld(),
-					WorkingVector.R.Origin,
-					bHit
-						? Intersection.ImpactPoint
-						: WorkingVector.R.Origin + WorkingVector.R.Direction * MaxRaycastDistance,
-					bHit ? FColor::Red : FColor::Green,
-					false,
-					5.0f,
-					0,
-					1.5f
-				);
-			}
+
 			if (!bHit)
 			{
 				WorkingVector.Invalid = true;
@@ -176,13 +166,14 @@ TArray<Impulse> AIR_Generator::CastRays(const FVector Center)
 
 			WorkingVector.CurrentImpulse.DistanceTraveled += Intersection.Distance;
 
-			if (Intersection.GetComponent() && Intersection.GetComponent() == Sphere)
+			if (Intersection.GetComponent() && Intersection.GetComponent() == ListenerSphere)
 			{
 				ReturnValue.Push(WorkingVector.CurrentImpulse);
 
 				// If we hit the listener, cast again ignoring the listener
 				WorkingVector.CurrentImpulse.DistanceTraveled -= Intersection.Distance;
-				CollisionParams.AddIgnoredComponent(Sphere);
+				CollisionParams.bReturnPhysicalMaterial = true;
+				CollisionParams.AddIgnoredComponent(ListenerSphere);
 				bool bHitNoListener = GetWorld()->LineTraceSingleByChannel(
 					Intersection,
 					WorkingVector.R.Origin,
@@ -291,23 +282,27 @@ void AIR_Generator::CalculateImpulseStarts(TArray<Impulse>& Impulses)
 #if WITH_EDITOR
 void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 {
-	TArray<Impulse> Impulses = CastRays(Sphere->GetComponentLocation());
+	// -- Impulse Generation --
+	TArray<Impulse> Impulses = CastRays(ListenerSphere->GetComponentLocation());
 	UE_LOG(LogTemp, Warning, TEXT("Found %i impulses"), Impulses.Num());
 	MergeImpulses(Impulses);
 	UE_LOG(LogTemp, Warning, TEXT("Merged, now %i impulses"), Impulses.Num());
 	CalculateImpulseStarts(Impulses);
 
+	// -- Impulse Filtering --
 
 	UE_LOG(LogTemp, Warning, TEXT("Running DSP"));
 	UE_LOG(LogTemp, Warning, TEXT("Should be %f seconds"), Impulses.Last().GetDelaySeconds() + LengthSeconds);
 	Audio::TSampleBuffer SampleBuffer = IR_Generator_DSP::RunDSP(Impulses, AcousticAbsorption, AtmosphericAbsorption);
 	UE_LOG(LogTemp, Warning, TEXT("Buffer finished with %i samples"), SampleBuffer.GetNumSamples());
 
+	// -- Impulse Writing -- 
+
 	UE_LOG(LogTemp, Warning, TEXT("Writing to wav"));
 	Audio::FSoundWavePCMWriter WaveWriter = Audio::FSoundWavePCMWriter();
 	const FString GeneratedDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("GeneratedIR"));
 	IFileManager::Get().MakeDirectory(*GeneratedDirectory, true);
-	
+
 	const FString WavFilePath = FPaths::Combine(GeneratedDirectory, FileName + TEXT(".wav"));
 	UE_LOG(LogTemp, Warning, TEXT("Checking for existing WAV at: %s"), *WavFilePath);
 	if (IFileManager::Get().FileExists(*WavFilePath))
@@ -320,7 +315,7 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No existing WAV file found"));
 	}
-	
+
 	WaveWriter.SynchronouslyWriteToWavFile(SampleBuffer, FileName, GeneratedDirectory);
 
 	// Delete existing SoundWave asset if it exists
@@ -338,12 +333,13 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 	}
 
 	// Deselect everything in content browser to prevent template dialog
-	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>(
+		"ContentBrowser");
 	TArray<UObject*> EmptySelection;
 	ContentBrowserModule.Get().SyncBrowserToAssets(EmptySelection, false, false);
 
 	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	
+
 	// Create and configure the Factory
 	USoundFactory* SoundFactory = NewObject<USoundFactory>();
 	SoundFactory->bAutoCreateCue = false;
@@ -362,11 +358,11 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 
 	// Execute via AssetTools
 	AssetToolsModule.Get().ImportAssetTasks({ImportTask});
-	
+
 	// Load the imported SoundWave by path
 	FString SoundWavePath = FString::Printf(TEXT("/Game/GeneratedIR/%s"), *FileName);
 	USoundWave* ImportedWave = Cast<USoundWave>(StaticLoadObject(USoundWave::StaticClass(), nullptr, *SoundWavePath));
-	
+
 	if (!ImportedWave)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load imported SoundWave at: %s"), *SoundWavePath);
@@ -383,19 +379,19 @@ void AIR_Generator::CalculateAndRecordImpulseResponseToFile()
 		TEXT(""),
 		IRAssetPath,
 		IRAssetName);
-	
+
 	UObject* GeneratedIR = AssetToolsModule.Get().CreateAsset(
 		IRAssetName,
 		FPackageName::GetLongPackagePath(IRAssetPath),
 		UAudioImpulseResponse::StaticClass(),
 		IRFactory);
-	
+
 	if (!GeneratedIR)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to create IR asset"));
 		return;
 	}
-	
+
 	Modify();
 	GeneratedImpulseResponse = Cast<UAudioImpulseResponse>(GeneratedIR);
 }

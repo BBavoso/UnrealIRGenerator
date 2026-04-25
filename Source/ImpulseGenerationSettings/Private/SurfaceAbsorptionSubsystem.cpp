@@ -2,6 +2,7 @@
 
 
 #include "SurfaceAbsorptionSubsystem.h"
+#include "SurfaceAbsorptionSettings.h"
 #include "PhysicsCore.h"
 
 
@@ -20,13 +21,14 @@ void USurfaceAbsorptionSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	}
 }
 
-const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficients(EPhysicalSurface PhysicalSurface)
+TArray<float> USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficients(
+	EPhysicalSurface PhysicalSurface)
 {
-	static const TArray<float> EmptyArray;
+	static const TArray<float> DefaultCoefficients = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 	if (!IsEnabled() || SurfaceAbsorptionData.IsEmpty())
 	{
-		return EmptyArray;
+		return DefaultCoefficients;
 	}
 
 	if (const UEnum* SurfaceEnum = StaticEnum<EPhysicalSurface>())
@@ -35,10 +37,10 @@ const TArray<float>& USurfaceAbsorptionSubsystem::GetSurfaceAbsorptionCoefficien
 		const FText DisplayName = SurfaceEnum->GetDisplayNameTextByValue(EnumValue);
 		const FName SurfaceName = FName(*DisplayName.ToString());
 		const FSurfaceAbsorptionData* AbsorptionData = SurfaceAbsorptionData.Find(SurfaceName);
-		return AbsorptionData ? AbsorptionData->Values : EmptyArray;
+		return AbsorptionData ? AbsorptionData->Values : DefaultCoefficients;
 	}
-	
-	return EmptyArray;
+
+	return DefaultCoefficients;
 }
 
 
@@ -50,9 +52,7 @@ bool USurfaceAbsorptionSubsystem::IsEnabled()
 #if !WITH_EDITOR
 	return false;
 #endif
-	
+
 	const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
 	return Settings->IsValidLowLevel();
 }
-
-

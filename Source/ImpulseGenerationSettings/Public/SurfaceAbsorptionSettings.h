@@ -34,7 +34,7 @@ struct FSurfaceAbsorptionData
 /**
  * 
  */
-UCLASS()
+UCLASS(config = Engine, defaultconfig)
 class IMPULSEGENERATIONSETTINGS_API USurfaceAbsorptionSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -48,7 +48,7 @@ public:
 	/**
 	* Map of surface types to their absorption coefficients
 	*/
-	UPROPERTY(EditAnywhere, Category = "Surface Absorption",
+	UPROPERTY(config, EditAnywhere, Category = "Surface Absorption",
 		meta = (GetKeyOptions = "GetSurfaceOptions"))
 	TMap<FName, FSurfaceAbsorptionData> SurfaceAbsorptionMap;
 };

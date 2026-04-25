@@ -13,6 +13,7 @@ public class ImpulseGenerationSettings : ModuleRules
                 "DeveloperSettings",
                 "Chaos",
                 "PhysicsCore",
+                "EditorSubsystem"
             }
         );
 

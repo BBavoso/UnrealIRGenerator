@@ -23,12 +23,12 @@ inline MaterialCoefficients GetAdjustedGainValues(
 {
 	MaterialCoefficients ReturnValue;
 	ReturnValue[0] = Audio::ConvertToDecibels(DesiredGainValues[0]);
-	// ReturnValue[0] = FMath::Clamp(ReturnValue[0], -32.0f, 32.0f);
-	float AccumulatedGain = 0.0f;
+	ReturnValue[0] = FMath::Clamp(ReturnValue[0], -32.0f, 32.0f);
+	float AccumulatedGain = ReturnValue[0];
 	for (int i = 1; i < NumFrequencyBands; i++)
 	{
 		ReturnValue[i] = 2.0f * (Audio::ConvertToDecibels(DesiredGainValues[i]) - AccumulatedGain);
-		// ReturnValue[i] = FMath::Clamp(ReturnValue[i], -32.0f, 32.0f);
+		ReturnValue[i] = FMath::Clamp(ReturnValue[i], -32.0f, 32.0f);
 		AccumulatedGain += ReturnValue[i];
 	}
 	return ReturnValue;
@@ -47,7 +47,7 @@ inline uint64 FadeOutStart = LengthSamples - FadeOutTimeSamples;
 class Filters
 {
 public:
-	void ApplyFiltersToAudio(TArray<float>& Input, const MaterialCoefficients& DesiredGainValues, double Distance, bool ApplyAcousticAbsorption, bool
+	void ApplyFiltersToAudio(TArray<float>& Input, const MaterialCoefficients& DesiredGainValues, double DistanceMeters, bool ApplyAcousticAbsorption, bool
 	                         ApplyAtmosphericAbsorption);
 
 private:

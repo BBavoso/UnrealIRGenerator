@@ -8,14 +8,14 @@ USurfaceAbsorptionSettings::USurfaceAbsorptionSettings(const FObjectInitializer&
 	: Super(ObjectInitializer)
 {
 	CategoryName = "Project";
-	
+
 	SectionName = "Surface Absorption";
 }
 
 TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const
 {
 	TArray<FName> SurfaceNames;
-	
+
 	if (const UEnum* SurfaceEnum = StaticEnum<EPhysicalSurface>())
 	{
 		for (int32 i = 0; i < SurfaceEnum->NumEnums() - 1; ++i)
@@ -25,6 +25,6 @@ TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const
 			SurfaceNames.Add(FName(*DisplayName.ToString()));
 		}
 	}
-	
+
 	return SurfaceNames;
 }
