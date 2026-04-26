@@ -8,6 +8,10 @@ The Impulses in this plugin can be generated for use with your own systems that 
 
 Impulse Responses are generated through the IR_Generator Actor. It has a few different options like whether or not you would like it to generate when you bake or the amount of rays that are used when generating. The Impules are dynamically generated based on the map geometry.
 
+**Note**: For accurate results, target meshes must allow Visibility line traces against the full mesh surface. If traces miss walls or hit incorrect locations, check the mesh collision settings and enable complex collision tracing.
+
+The easiest way to do this is to change the default shape complexity in the project's physics settings to 'Use Complex As Simple', at least while generating.
+
 ### Atmospheric Absorption
 
 If you would like to account for sound lost due to the air turn on atmospheric absorption. This uses the air temperature and humidity and calculates the best fitting low pass filter at each moment during the impulse.

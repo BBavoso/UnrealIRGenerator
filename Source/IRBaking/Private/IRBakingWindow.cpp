@@ -24,13 +24,6 @@ void SIRBakingWindow::Construct(const FArguments& InArgs)
 			.TextStyle(FAppStyle::Get(), "NormalText.Important")
 		]
 		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(20.0f)
-		[
-			SNew(STextBlock)
-			.Text(FText::FromString("Window is working!"))
-		]
-		+ SVerticalBox::Slot()
 		.Padding(20.0f)
 		[
 			SNew(SButton)

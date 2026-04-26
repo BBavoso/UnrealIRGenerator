@@ -19,7 +19,6 @@ public class IRProbe : ModuleRules {
 				"SlateCore",
 				"SignalProcessing",
 				"Synthesis",
-				"ImpulseGenerationSettings",
 				"PhysicsCore"
 			}
 		);
@@ -31,6 +30,7 @@ public class IRProbe : ModuleRules {
 			PrivateDependencyModuleNames.Add("UnrealEd");
 			PrivateDependencyModuleNames.Add("EditorScriptingUtilities");
 			PrivateDependencyModuleNames.Add("ContentBrowser");
+			PrivateDependencyModuleNames.Add("ImpulseGenerationSettings");
 		}
 	}
 }

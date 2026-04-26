@@ -6,7 +6,7 @@
 #include "SurfaceAbsorptionSettings.h"
 #include "Chaos/ChaosEngineInterface.h"
 #include "Engine/DataTable.h"
-#include "Subsystems/GameInstanceSubsystem.h"
+#include "EditorSubsystem.h"
 #include "SurfaceAbsorptionSubsystem.generated.h"
 
 /**

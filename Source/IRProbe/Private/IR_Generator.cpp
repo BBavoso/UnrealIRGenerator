@@ -7,14 +7,11 @@
 #include "Sampling/SphericalFibonacci.h"
 #include "Sound/SampleBufferIO.h"
 #include "Engine/World.h"
-#include "DrawDebugHelpers.h"
-#include "PhysicsCore.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "EffectConvolutionReverb.h"
-#include "SurfaceAbsorptionSubsystem.h"
 
 #if WITH_EDITOR
-#include "ImpulseGenerationSettings/Public/SurfaceAbsorptionSettings.h"
+#include "SurfaceAbsorptionSubsystem.h"
 #include "Factories/SoundFactory.h"
 #include "AudioImpulseResponseAsset.h"
 #include "HAL/FileManager.h"

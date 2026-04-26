@@ -13,7 +13,6 @@ public class ImpulseGenerationSettings : ModuleRules
                 "DeveloperSettings",
                 "Chaos",
                 "PhysicsCore",
-                "EditorSubsystem"
             }
         );
 
@@ -24,7 +23,13 @@ public class ImpulseGenerationSettings : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "EditorSubsystem",
             }
         );
+        
+        if (Target.bBuildEditor) {
+            // PrivateDependencyModuleNames.Add("EditorSubsystem");
+            // PublicDependencyModuleNames.Add("EditorSubsystem");
+        }
     }
 }
