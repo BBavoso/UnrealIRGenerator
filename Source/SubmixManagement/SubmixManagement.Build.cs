@@ -23,8 +23,12 @@ public class SubmixManagement : ModuleRules
                 "SlateCore",
                 "AudioMixer",
                 "Synthesis",
-                "IRProbe"
             }
         );
+
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.Add("IRProbe");
+        }
     }
 }

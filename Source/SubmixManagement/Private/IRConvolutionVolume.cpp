@@ -29,14 +29,15 @@ void AIRConvolutionVolume::UpdateVolumeWithoutGenerating()
 		return;
 	}	
 	
-	if (!IrGenerator->GeneratedImpulseResponse)
+	AIR_Generator* Generator = Cast<AIR_Generator>(IrGenerator);
+	if (!Generator || !Generator->GeneratedImpulseResponse)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Impulse response has not been generated yet, use 'Bake Impulse and Update Volume'"));
 		return;
 	}
 	
 	Modify();
-	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
+	ImpulseResponse = Generator->GeneratedImpulseResponse;
 }
 
 void AIRConvolutionVolume::BakeImpulseAndUpdateVolume()
@@ -47,16 +48,16 @@ void AIRConvolutionVolume::BakeImpulseAndUpdateVolume()
 		return;
 	}	
 	
-	
-	if (!IrGenerator->BakeProbe)
+	AIR_Generator* Generator = Cast<AIR_Generator>(IrGenerator);
+	if (!Generator || !Generator->BakeProbe)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Impulse Response Generator has baking disabled, enable it first to bake it"));
 		return;
 	}
 	
-	IrGenerator->CalculateAndRecordImpulseResponseToFile();
+	Generator->CalculateAndRecordImpulseResponseToFile();
 	
-	ImpulseResponse = IrGenerator->GeneratedImpulseResponse;
+	ImpulseResponse = Generator->GeneratedImpulseResponse;
 }
 #endif
 

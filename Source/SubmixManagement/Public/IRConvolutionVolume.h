@@ -34,8 +34,8 @@ public:
 	TObjectPtr<UAudioImpulseResponse> ImpulseResponse;
 	
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution")
-	TObjectPtr<AIR_Generator> IrGenerator;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IR Convolution", meta=(AllowedClasses="/Script/IRProbe.IR_Generator"))
+	TObjectPtr<UObject> IrGenerator;
 #endif
 
 
