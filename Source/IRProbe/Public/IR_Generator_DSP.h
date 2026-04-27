@@ -12,10 +12,6 @@ static float FadeOutTimeSeconds = 0.002;
 
 constexpr uint NumFrequencyBands = 6;
 
-// Inputs for atmospheric absorbtion solver
-constexpr double HumidityPercent = 50;
-constexpr double TemperatureFahrenheit = 50;
-
 using MaterialCoefficients = TStaticArray<float, NumFrequencyBands>;
 
 inline MaterialCoefficients GetAdjustedGainValues(

@@ -2,6 +2,7 @@
 #include "SampleBuffer.h"
 #include "DSP/Noise.h"
 #include "AtmosphericFilterCutoffSolver.h"
+#include "SurfaceAbsorptionSettings.h"
 
 
 Audio::TSampleBuffer<> IR_Generator_DSP::RunDSP(
@@ -48,8 +49,12 @@ void Filters::ApplyFiltersToAudio(
 	{
 		MaterialCoefficients AdjustedGainValues = GetAdjustedGainValues(DesiredGainValues);
 
-		UE_LOG(LogTemp, Warning, TEXT("gain lin %f %f %f %f %f %f at time %f"), DesiredGainValues[0],DesiredGainValues[1] , DesiredGainValues[2], DesiredGainValues[3], DesiredGainValues[4], DesiredGainValues[5], static_cast<float>(DistanceMeters) / 343.0f);
-		UE_LOG(LogTemp, Warning, TEXT("gain db %f %f %f %f %f %f at time %f"), AdjustedGainValues[0],AdjustedGainValues[1] , AdjustedGainValues[2], AdjustedGainValues[3], AdjustedGainValues[4], AdjustedGainValues[5], static_cast<float>(DistanceMeters) / 343.0f);
+		UE_LOG(LogTemp, Warning, TEXT("gain lin %f %f %f %f %f %f at time %f"), DesiredGainValues[0],
+		       DesiredGainValues[1], DesiredGainValues[2], DesiredGainValues[3], DesiredGainValues[4],
+		       DesiredGainValues[5], static_cast<float>(DistanceMeters) / 343.0f);
+		UE_LOG(LogTemp, Warning, TEXT("gain db %f %f %f %f %f %f at time %f"), AdjustedGainValues[0],
+		       AdjustedGainValues[1], AdjustedGainValues[2], AdjustedGainValues[3], AdjustedGainValues[4],
+		       AdjustedGainValues[5], static_cast<float>(DistanceMeters) / 343.0f);
 
 		Filter0.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::LowShelf, 125, 1, AdjustedGainValues[0]);
 		Filter1.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::HighShelf, 125, 1, AdjustedGainValues[0]);
@@ -78,8 +83,12 @@ void Filters::ApplyFiltersToAudio(
 
 	if (ApplyAtmosphericAbsorption)
 	{
+		const USurfaceAbsorptionSettings* Settings = GetDefault<USurfaceAbsorptionSettings>();
+		double HumidityPercent = Settings->HumidityPercent;
+		double TemperatureFahrenheit = Settings->AirTemperatureFahrenheit;
+		
 		AtmosphericFilterCutoffSolver solver = AtmosphericFilterCutoffSolver(HumidityPercent, TemperatureFahrenheit);
-		auto lowPassFrequency = solver.Solve(DistanceMeters);
+		double lowPassFrequency = solver.Solve(DistanceMeters);
 
 		AtmosphericLowpass.Init(ImpulseSampleRate, 1, Audio::EBiquadFilter::Lowpass, lowPassFrequency);
 		AtmosphericLowpass.SetEnabled(true);

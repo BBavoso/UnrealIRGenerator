@@ -44,6 +44,12 @@ public:
 	
 	UFUNCTION()
 	TArray<FName> GetSurfaceOptions() const;
+	
+	UPROPERTY(EditAnywhere)
+	double AirTemperatureFahrenheit = 50;
+	
+	UPROPERTY(EditAnywhere)
+	double HumidityPercent = 50;
 
 	/**
 	* Map of surface types to their absorption coefficients
