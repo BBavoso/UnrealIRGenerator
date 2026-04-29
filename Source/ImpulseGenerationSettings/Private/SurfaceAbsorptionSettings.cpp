@@ -9,7 +9,7 @@ USurfaceAbsorptionSettings::USurfaceAbsorptionSettings(const FObjectInitializer&
 {
 	CategoryName = "Project";
 
-	SectionName = "Surface Absorption";
+	SectionName = "Impulse Generation";
 }
 
 TArray<FName> USurfaceAbsorptionSettings::GetSurfaceOptions() const

@@ -45,10 +45,10 @@ public:
 	UFUNCTION()
 	TArray<FName> GetSurfaceOptions() const;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Atmospheric Absorption")
 	double AirTemperatureFahrenheit = 50;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Atmospheric Absorption")
 	double HumidityPercent = 50;
 
 	/**
