@@ -18,13 +18,13 @@ The easiest way to do this is to change the default shape complexity in the proj
 
 If you would like to account for sound lost due to the air turn on atmospheric absorption. This uses the air temperature and humidity and calculates the best fitting low pass filter at each moment during the impulse.
 
-<video controls src="https://github.com/user-attachments/assets/64f30027-35fe-4074-b2fe-782cb89cfb89" />
+<video controls src="https://github.com/user-attachments/assets/64f30027-35fe-4074-b2fe-782cb89cfb89"></video>
 
 ### Surface Absorption
 
 If you would like to account for sound lost due to it hitting different surfaces turn on surface absoption. This uses the surface aborption coefficients in the project settings to filter the audio based the refection of the material at different frequency bands.
 
-<video controls src="https://github.com/user-attachments/assets/dc6c338c-c34e-41dd-9ba4-224485173a0b" />
+<video controls src="https://github.com/user-attachments/assets/dc6c338c-c34e-41dd-9ba4-224485173a0b"></video>
 
 ### Settings Window
 
@@ -54,7 +54,7 @@ Getting a minimal setup of the plugin is simple. Here is me setting up the unrea
 
 Some Parts of the video are sped up / cut out for time.
 
-<video controls src="https://github.com/user-attachments/assets/de435d9d-70f7-40e6-b191-0db448b25ba7">
+<video controls src="https://github.com/user-attachments/assets/de435d9d-70f7-40e6-b191-0db448b25ba7"></video>
 
 
 
