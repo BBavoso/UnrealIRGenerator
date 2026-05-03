@@ -32,6 +32,14 @@ There is a settings menu in your project settings to manage the air temperature 
 
 <img width="1756" height="1114" alt="Settings Menu" src="https://github.com/user-attachments/assets/8de5b1ab-f321-4195-8224-384be6ac9e06" />
 
+#### Absorption Coeficcients?
+
+The absorption coefficients are a set of 6 numbers that represent how much sound get reflected at different frequencies. 
+
+There are various sources online to find material absorption but here are some good sources I've found:
+- [Absorption coefficients of common building materials and finishes](https://www.acoustic-supplies.com/absorption-coefficient-chart/)
+- [acoustic.ua Absorption Data](https://www.acoustic.ua/st/web_absorption_data_eng.pdf)
+
 ## Runtime Impulse Based Convolution Managment
 
 If you want to automacally manage the generated impulse reponses that you have made with this plugin, the easiest way to do that is to use the Convolution Volume and baking sysstem that come with the plugin.
